@@ -1,9 +1,8 @@
 {
   "version": 2,
   "builds": [{ "src": "index.html", "use": "@vercel/static-build" }],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -11,7 +10,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestorsframe-ancestors https://dikagustiana.com https://*.wordpress.com https://*.wp.com;//*.wp.com;"
+          "value": "frame-ancestors https://dikagustiana.com https://*.wordpress.com https://*.wp.com;"
         }
       ]
     }
