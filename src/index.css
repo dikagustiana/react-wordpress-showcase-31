@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Professional Financial Reporting Design System */
+
+@layer base {
+  :root {
+    /* Updated color palette based on user requirements */
+    --background: 0 0% 100%; /* White (#FFFFFF) */
+    --foreground: 220 14% 11%; /* Dark gray (#111827) */
+
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 220 14% 11%; /* Dark gray */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 14% 11%;
+
+    /* Primary color - Dark blue (#0F1B2D) */
+    --primary: 210 58% 11%; /* #0F1B2D */
+    --primary-foreground: 0 0% 100%; /* White */
+    --primary-hover: 210 58% 15%;
+
+    /* Secondary colors - Light grays */
+    --secondary: 0 0% 96%; /* #F6F6F6 */
+    --secondary-foreground: 220 14% 11%;
+
+    --muted: 210 40% 92%; /* #E2E8F0 */
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 0 0% 96%; /* #F6F6F6 */
+    --accent-foreground: 220 14% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 40% 92%; /* #E2E8F0 */
+    --input: 210 40% 92%;
+    --ring: 210 58% 11%; /* Dark blue */
+
+    /* Border radius values */
+    --radius-sm: 6px;
+    --radius: 8px;
+    --radius-md: 12px;
+    --radius-lg: 14px;
+
+    /* Corporate colors updated */
+    --corporate-blue: 210 58% 11%; /* Primary dark blue */
+    --corporate-blue-light: 210 100% 95%;
+    --corporate-gray: 215 20% 55%;
+    --corporate-gray-light: 210 40% 92%;
+
+    /* Table specific colors */
+    --table-header: 210 58% 11%; /* Dark blue header */
+    --table-header-foreground: 0 0% 100%; /* White text */
+    --table-row-even: 0 0% 100%; /* White */
+    --table-row-odd: 0 0% 96%; /* Light gray (#F6F6F6) */
+    --table-border: 210 40% 92%;
+    --table-hover: 210 40% 96%; /* Light hover effect */
+
+    /* Enhanced shadows and effects */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-hero: 0 20px 25px -5px rgb(0 0 0 / 0.2);
+
+    /* Books & Academia specific colors */
+    --books-navy: 214 33% 22%; /* #2F4B6E */
+    --books-light-blue: 203 100% 95%; /* #E6F4FF */
+    --books-card-blue: 203 100% 93%; /* #DFF1FF */
+    --books-accent-green: 164 39% 56%; /* #3FB68B */
+
+    /* Navy variations for professional look */
+    --navy-dark: 47 75 110;
+    --navy-light: 64 93 140;
+    
+    /* Beige background for sidebar */
+    --beige-light: 35 25 94; /* #F6F3EE */
+
+    /* Unified Card Theme - Updated to exact specifications */
+    --card-bg-light: 199 100% 97%; /* #F0F9FF - Light blue background */
+    --card-bg-light-hover: 199 100% 94%; /* Slightly darker for hover */
+    --card-icon-bg: 0 0% 100%; /* White icon background */
+    --card-title: 214 33% 22%; /* #2F4B6E - Bold dark blue title */
+    --card-description: 215 16% 47%; /* #6B7280 - Gray description */
+    --card-cta: 142 71% 45%; /* #22C55E - Green CTA link */
+    --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* Subtle soft shadow */
+    --card-shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* Stronger hover shadow */
+    --card-radius: 12px; /* 12px rounded corners */
+
+    /* Hero section colors */
+    --hero-bg: 0 0% 100%;
+    --hero-text: 220 14% 11%;
+    --hero-accent: 210 58% 11%;
+
+    /* Card colors */
+    --card-bg: 0 0% 100%;
+    --card-border: 210 40% 92%;
+    --card-hover-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+    /* Typography scale */
+    --font-h1: 3rem;      /* 48px */
+    --font-h2: 1.75rem;   /* 28px */
+    --font-h3: 1.5rem;    /* 24px */
+    --font-h4: 1.25rem;   /* 20px */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+    --font-size-6xl: 3.75rem;
+
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 14% 11%;
+    --sidebar-primary: 210 58% 11%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 220 14% 11%;
+    --sidebar-border: 210 40% 92%;
+    --sidebar-ring: 210 58% 11%;
+
+    /* Footer colors */
+    --footer-bg: 36 6% 98%; /* #F9FAFB */
+    --footer-text: 206 43% 21%; /* #203040 */
+    --footer-link: 214 33% 22%; /* #2F4B6E */
+    --footer-link-hover: 214 40% 30%;
+  }
+
+  .dark {
+    /* Dark mode with dark blue theme */
+    --background: 210 58% 11%; /* Dark blue background */
+    --foreground: 0 0% 100%;
+
+    --card: 210 50% 15%; /* Darker blue for cards */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 210 50% 15%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 210 100% 60%; /* Lighter blue for primary */
+    --primary-foreground: 210 58% 11%;
+
+    --secondary: 210 40% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 40% 20%;
+    --muted-foreground: 210 20% 70%;
+
+    --accent: 210 40% 20%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 40% 25%;
+    --input: 210 40% 25%;
+    --ring: 210 100% 60%;
+
+    /* Table colors for dark mode */
+    --table-header: 210 58% 11%;
+    --table-header-foreground: 0 0% 100%;
+    --table-row-even: 210 50% 15%;
+    --table-row-odd: 210 40% 20%;
+    --table-border: 210 40% 25%;
+    --table-hover: 210 40% 25%;
+
+    /* Sidebar colors for dark mode */
+    --sidebar-background: 210 58% 11%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 210 100% 60%;
+    --sidebar-primary-foreground: 210 58% 11%;
+    --sidebar-accent: 210 40% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 210 40% 25%;
+    --sidebar-ring: 210 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}

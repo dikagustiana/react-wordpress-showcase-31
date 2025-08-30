@@ -1,0 +1,154 @@
+{
+  "name": "Financial Reporting Portal",
+  "short_name": "FinReport Portal",
+  "description": "Comprehensive financial reporting and compliance platform",
+  "version": "1.0.0",
+  "theme_color": "#1e40af",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/",
+  "entrypoints": {
+    "main": {
+      "js": "assets/index.js",
+      "css": "assets/index.css"
+    }
+  },
+  "pages": [
+    {
+      "slug": "home",
+      "path": "/",
+      "title": "Home - Financial Reporting Portal"
+    },
+    {
+      "slug": "accounting",
+      "path": "/accounting",
+      "title": "Accounting - Financial Reporting Portal"
+    },
+    {
+      "slug": "fsli",
+      "path": "/accounting/fsli",
+      "title": "FSLI - Financial Statement Line Items"
+    },
+    {
+      "slug": "cash-and-cash-equivalents",
+      "path": "/accounting/fsli/cash-and-cash-equivalents",
+      "title": "Cash and Cash Equivalents - FSLI Detail"
+    },
+    {
+      "slug": "restricted-cash",
+      "path": "/accounting/fsli/restricted-cash",
+      "title": "Restricted Cash - FSLI Detail"
+    },
+    {
+      "slug": "trade-receivables-net",
+      "path": "/accounting/fsli/trade-receivables-net",
+      "title": "Trade Receivables, Net - FSLI Detail"
+    },
+    {
+      "slug": "third-parties",
+      "path": "/accounting/fsli/third-parties",
+      "title": "Third Parties - FSLI Detail"
+    },
+    {
+      "slug": "related-parties",
+      "path": "/accounting/fsli/related-parties",
+      "title": "Related Parties - FSLI Detail"
+    },
+    {
+      "slug": "other-receivables-net",
+      "path": "/accounting/fsli/other-receivables-net",
+      "title": "Other Receivables, Net - FSLI Detail"
+    },
+    {
+      "slug": "due-from-government",
+      "path": "/accounting/fsli/due-from-government",
+      "title": "Due from the Government - FSLI Detail"
+    },
+    {
+      "slug": "inventories-net",
+      "path": "/accounting/fsli/inventories-net",
+      "title": "Inventories, Net - FSLI Detail"
+    },
+    {
+      "slug": "corporate-dividend-taxes-receivable-current",
+      "path": "/accounting/fsli/corporate-dividend-taxes-receivable-current",
+      "title": "Corporate and Dividend Taxes Receivable (Current) - FSLI Detail"
+    },
+    {
+      "slug": "advances-prepayments-current",
+      "path": "/accounting/fsli/advances-prepayments-current",
+      "title": "Advances and Prepayments (Current) - FSLI Detail"
+    },
+    {
+      "slug": "other-current-assets",
+      "path": "/accounting/fsli/other-current-assets",
+      "title": "Other Current Assets - FSLI Detail"
+    },
+    {
+      "slug": "other-non-current-assets",
+      "path": "/accounting/fsli/other-non-current-assets",
+      "title": "Other Non-Current Assets - FSLI Detail"
+    },
+    {
+      "slug": "restricted-cash-non-current",
+      "path": "/accounting/fsli/restricted-cash-non-current",
+      "title": "Restricted Cash (Non-Current) - FSLI Detail"
+    },
+    {
+      "slug": "trade-receivables-net-non-current",
+      "path": "/accounting/fsli/trade-receivables-net-non-current",
+      "title": "Trade Receivables, Net (Non-Current) - FSLI Detail"
+    },
+    {
+      "slug": "fixed-assets-net",
+      "path": "/accounting/fsli/fixed-assets-net",
+      "title": "Fixed Assets, Net - FSLI Detail"
+    },
+    {
+      "slug": "investment-properties",
+      "path": "/accounting/fsli/investment-properties",
+      "title": "Investment Properties - FSLI Detail"
+    },
+    {
+      "slug": "deferred-tax-assets",
+      "path": "/accounting/fsli/deferred-tax-assets",
+      "title": "Deferred Tax Assets - FSLI Detail"
+    },
+    {
+      "slug": "long-term-investments",
+      "path": "/accounting/fsli/long-term-investments",
+      "title": "Long-Term Investments - FSLI Detail"
+    },
+    {
+      "slug": "advances-prepayments-non-current",
+      "path": "/accounting/fsli/advances-prepayments-non-current",
+      "title": "Advances and Prepayments (Non-Current) - FSLI Detail"
+    },
+    {
+      "slug": "corporate-dividend-taxes-receivable-non-current",
+      "path": "/accounting/fsli/corporate-dividend-taxes-receivable-non-current",
+      "title": "Corporate and Dividend Taxes Receivable (Non-Current) - FSLI Detail"
+    },
+    {
+      "slug": "other-non-current-receivables",
+      "path": "/accounting/fsli/other-non-current-receivables",
+      "title": "Other Non-Current Receivables - FSLI Detail"
+    },
+    {
+      "slug": "oil-gas-properties-net",
+      "path": "/accounting/fsli/oil-gas-properties-net",
+      "title": "Oil and Gas Properties, Net - FSLI Detail"
+    },
+    {
+      "slug": "right-of-use-assets-net",
+      "path": "/accounting/fsli/right-of-use-assets-net",
+      "title": "Right of Use Assets, Net - FSLI Detail"
+    },
+    {
+      "slug": "other-non-current-assets-final",
+      "path": "/accounting/fsli/other-non-current-assets-final",
+      "title": "Other Non-Current Assets (Final) - FSLI Detail"
+    }
+  ]
+}

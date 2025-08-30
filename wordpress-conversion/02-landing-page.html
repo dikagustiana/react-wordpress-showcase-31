@@ -1,0 +1,260 @@
+<!-- 
+   Learning Buddy - Landing Page
+   Instructions: Create a new page in WordPress, switch to Code Editor, and paste this HTML in a Custom HTML block
+-->
+
+<div class="lb-container">
+  <!-- Header -->
+  <header class="lb-header">
+    <nav class="lb-nav">
+      <a href="/" class="lb-logo">Financial Education Hub</a>
+      
+      <ul class="lb-nav-menu">
+        <li class="lb-nav-item">
+          <a href="/" class="lb-nav-link active">Home</a>
+        </li>
+        
+        <li class="lb-nav-item">
+          <a href="/accounting" class="lb-nav-link">
+            Accounting
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.25rem; transition: transform 0.2s;">
+              <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <div class="lb-nav-dropdown">
+            <a href="/accounting/fsli">FSLI Detail</a>
+            <a href="/accounting/consolidated-reporting">Consolidated Reporting</a>
+            <a href="/accounting/statutory-reporting">Statutory Reporting</a>
+          </div>
+        </li>
+        
+        <li class="lb-nav-item">
+          <a href="/finance-101" class="lb-nav-link">
+            Finance 101
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.25rem; transition: transform 0.2s;">
+              <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <div class="lb-nav-dropdown">
+            <a href="/finance-101/financial-analytics">Financial Analytics</a>
+            <a href="/finance-101/financial-planning-forecasting">Financial Planning & Forecasting</a>
+            <a href="/finance-101/budgeting">Budgeting</a>
+            <a href="/finance-101/cfa-prep">CFA Prep</a>
+          </div>
+        </li>
+        
+        <li class="lb-nav-item">
+          <a href="/green-transition" class="lb-nav-link">
+            The Green Transition
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.25rem; transition: transform 0.2s;">
+              <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <div class="lb-nav-dropdown">
+            <a href="/green-transition/now">Where We Are Now</a>
+            <a href="/green-transition/gaps">The Gaps Between Ambition and Reality</a>
+            <a href="/green-transition/future">Where We Will Go and How</a>
+          </div>
+        </li>
+        
+        <li class="lb-nav-item">
+          <a href="/books-academia" class="lb-nav-link">Books and Academia</a>
+        </li>
+        
+        <li class="lb-nav-item">
+          <a href="/english-ielts" class="lb-nav-link">English IELTS</a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="lb-hero">
+      <div class="lb-hero-bg" style="background-image: url('YOUR_HERO_IMAGE_URL_HERE');"></div>
+      <div class="lb-hero-overlay"></div>
+      
+      <div class="lb-hero-content">
+        <h1 class="lb-hero-title">
+          Every Great Story Begins with Someone Who Was Scared but Did It Anyway
+        </h1>
+        <p class="lb-hero-subtitle">
+          Just begin. Messy, nervous, unsure. That's how the best stories start
+        </p>
+        <button class="lb-btn" onclick="scrollToPaths()">
+          Choose Your Path
+        </button>
+      </div>
+    </section>
+
+    <!-- Education Modules Grid -->
+    <section id="lb-paths-section" class="lb-section">
+      <div class="lb-max-width">
+        <div class="lb-grid lb-md-grid-cols-2">
+          
+          <!-- Accounting 101 Card -->
+          <a href="/accounting" class="lb-card lb-animate-fade-in">
+            <div class="lb-card-icon">
+              <div class="lb-card-icon-container">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <h3 class="lb-card-title">Accounting 101</h3>
+            <p class="lb-card-description">
+              Master the fundamentals of accounting with comprehensive guides and practical examples.
+            </p>
+            <div class="lb-card-cta">
+              Start Learning
+              <span class="lb-card-arrow">→</span>
+            </div>
+          </a>
+
+          <!-- Finance 101 Card -->
+          <a href="/finance-101" class="lb-card lb-animate-fade-in">
+            <div class="lb-card-icon">
+              <div class="lb-card-icon-container">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <polyline points="22,12 18,12 15,21 9,3 6,12 2,12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <h3 class="lb-card-title">Finance 101</h3>
+            <p class="lb-card-description">
+              Learn essential financial concepts and investment strategies for personal and business success.
+            </p>
+            <div class="lb-card-cta">
+              Start Learning
+              <span class="lb-card-arrow">→</span>
+            </div>
+          </a>
+
+          <!-- Green Transition Card -->
+          <a href="/green-transition" class="lb-card lb-animate-fade-in">
+            <div class="lb-card-icon">
+              <div class="lb-card-icon-container">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m17 21 4-4-4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 11v-1a4 4 0 0 1 4-4h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="m7 3-4 4 4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M21 13v1a4 4 0 0 1-4 4H3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <h3 class="lb-card-title">Green Transition</h3>
+            <p class="lb-card-description">
+              Explore sustainable finance and environmental accounting practices for the future.
+            </p>
+            <div class="lb-card-cta">
+              Start Learning
+              <span class="lb-card-arrow">→</span>
+            </div>
+          </a>
+
+          <!-- English IELTS Card -->
+          <a href="/english-ielts" class="lb-card lb-animate-fade-in">
+            <div class="lb-card-icon">
+              <div class="lb-card-icon-container">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <h3 class="lb-card-title">English IELTS</h3>
+            <p class="lb-card-description">
+              Improve your English skills with targeted IELTS preparation and practice materials.
+            </p>
+            <div class="lb-card-cta">
+              Start Learning
+              <span class="lb-card-arrow">→</span>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="lb-footer">
+    <div class="lb-footer-content">
+      <div class="lb-footer-grid">
+        <!-- Brand Section -->
+        <div class="lb-footer-section">
+          <h3>Financial Education Hub</h3>
+          <p>
+            Empowering individuals with financial knowledge and education. 
+            Every great story begins with someone who was scared but did it anyway.
+          </p>
+        </div>
+        
+        <!-- Learn Section -->
+        <div class="lb-footer-section">
+          <h4>Learn</h4>
+          <ul class="lb-footer-list">
+            <li><a href="/accounting">Accounting 101</a></li>
+            <li><a href="/finance-101">Finance 101</a></li>
+            <li><a href="/green-transition">Green Transition</a></li>
+            <li><a href="/english-ielts">English IELTS</a></li>
+          </ul>
+        </div>
+        
+        <!-- Company Section -->
+        <div class="lb-footer-section">
+          <h4>Company</h4>
+          <ul class="lb-footer-list">
+            <li><a href="/about">About</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="lb-footer-bottom">
+        <p>© 2024 Financial Education Hub. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+// Smooth scroll to paths section
+function scrollToPaths() {
+  const pathsSection = document.getElementById('lb-paths-section');
+  if (pathsSection) {
+    pathsSection.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
+// Add smooth scrolling for all internal links
+document.addEventListener('DOMContentLoaded', function() {
+  // Add animation delays to cards
+  const cards = document.querySelectorAll('.lb-animate-fade-in');
+  cards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.1}s`;
+  });
+});
+</script>
+
+<style>
+/* Page-specific styles (include global CSS above this) */
+.lb-hero-bg {
+  /* Replace YOUR_HERO_IMAGE_URL_HERE with your actual image URL */
+  background-image: url('YOUR_HERO_IMAGE_URL_HERE');
+}
+
+/* Alternative: If you want to add the image inline, use this instead */
+/*
+.lb-hero-bg {
+  background-image: url('https://your-domain.com/wp-content/uploads/your-hero-image.jpg');
+}
+*/
+</style>

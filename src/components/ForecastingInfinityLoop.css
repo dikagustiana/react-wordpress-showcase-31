@@ -1,0 +1,64 @@
+/* Focus styles for accessibility */
+.forecasting-loop circle:focus {
+  outline: 3px solid #3FB68B;
+  outline-offset: 2px;
+  filter: drop-shadow(0 0 8px rgba(63, 182, 139, 0.6));
+}
+
+/* Hover effects for better UX */
+.forecasting-loop .group-hover-area:hover circle {
+  opacity: 0.2 !important;
+}
+
+/* High contrast focus for WCAG AA compliance */
+@media (prefers-contrast: high) {
+  .forecasting-loop circle:focus {
+    outline: 4px solid #000;
+    outline-offset: 3px;
+  }
+}
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .forecasting-loop * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Tooltip styling */
+.forecasting-loop [title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Ensure proper text rendering */
+.forecasting-loop text {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .forecasting-loop text {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .forecasting-loop text {
+    font-size: 8px;
+  }
+}
