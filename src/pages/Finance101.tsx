@@ -39,7 +39,7 @@ const Finance101 = () => {
 
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
-    { label: 'Finance 101' }
+    { label: 'Finance' }
   ];
 
   return (
@@ -52,7 +52,7 @@ const Finance101 = () => {
           
           <div className="mb-12">
             <h1 className="text-h1 font-bold text-foreground mb-6">
-              Finance 101
+              Finance
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl">
               Master essential financial concepts and analytical skills through comprehensive modules covering 

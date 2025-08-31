@@ -14,7 +14,7 @@ const ExecutiveDashboard = () => {
 
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
-    { label: 'Finance 101', path: '/finance-101' },
+    { label: 'Finance', path: '/finance-101' },
     { label: 'Executive Dashboard' }
   ];
 

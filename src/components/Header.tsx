@@ -34,16 +34,7 @@ const Header = () => {
   }];
   return <header className="sticky top-0 z-50 bg-primary shadow-lg">
       <div className="max-w-content mx-auto px-6">
-        <nav className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-3 text-xl font-semibold text-primary-foreground hover:opacity-90 transition-opacity">
-            <img 
-              src="/lovable-uploads/faf0d242-4524-4b6b-9fd8-c9f4478afc86.png" 
-              alt="Your Friendly Learning Buddy Logo" 
-              className="h-8 w-auto"
-            />
-            <span>Your Friendly Learning Buddy</span>
-          </Link>
-          
+        <nav className="flex items-end justify-center h-16">
           <div className="flex space-x-1">
             {/* Home */}
             <Link to="/" className={`px-4 py-2 text-sm font-medium transition-colors rounded-md ${isActive('/') && location.pathname === '/' ? 'bg-primary-hover text-primary-foreground' : 'text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-hover'}`}>
@@ -75,10 +66,10 @@ const Header = () => {
               </div>
             </div>
 
-            {/* Finance 101 with Dropdown */}
+            {/* Finance with Dropdown */}
             <div className="relative group" onMouseEnter={() => setHoveredMenu('finance101')} onMouseLeave={() => setHoveredMenu(null)}>
               <Link to="/finance-101" className={`flex items-center px-4 py-2 text-sm font-medium transition-colors rounded-md ${isActive('/finance-101') ? 'bg-primary-hover text-primary-foreground' : 'text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-hover'}`}>
-                Finance 101
+                Finance
                 <ChevronDown className={`ml-1 w-4 h-4 transition-transform duration-200 ${hoveredMenu === 'finance101' ? 'rotate-180' : ''}`} />
               </Link>
               

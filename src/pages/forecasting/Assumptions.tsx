@@ -5,7 +5,7 @@ import Breadcrumb from '../../components/Breadcrumb';
 const ForecastingAssumptions = () => {
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
-    { label: 'Finance 101', path: '/finance-101' },
+    { label: 'Finance', path: '/finance-101' },
     { label: 'Financial Planning & Forecasting', path: '/finance-101/financial-planning-forecasting' },
     { label: 'Assumptions & Drivers' }
   ];

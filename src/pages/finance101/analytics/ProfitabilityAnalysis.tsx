@@ -5,7 +5,7 @@ import Breadcrumb from '../../../components/Breadcrumb';
 const ProfitabilityAnalysis = () => {
   const breadcrumbItems = [
     { label: 'Home', path: '/' },
-    { label: 'Finance 101', path: '/finance-101' },
+    { label: 'Finance', path: '/finance-101' },
     { label: 'Financial Analytics', path: '/finance-101/financial-analytics' },
     { label: 'Profitability Analysis' }
   ];
