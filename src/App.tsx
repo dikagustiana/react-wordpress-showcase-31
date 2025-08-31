@@ -30,6 +30,8 @@ import CFAPrep from "./pages/finance101/CFAPrep";
 import EnglishIELTS from "./pages/EnglishIELTS";
 import BooksAcademia from "./pages/BooksAcademia";
 import Categories from "./pages/books/Categories";
+import Settings from "./pages/Settings";
+import EmbedExample from "./pages/EmbedExample";
 import NotFound from "./pages/NotFound";
 
 // Consolidation pages
@@ -117,6 +119,8 @@ const App = () => (
           <Route path="/books-academia" element={<BooksAcademia />} />
           <Route path="/books/categories" element={<Categories />} />
           <Route path="/books/:category" element={<BookListPage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/embed-example" element={<EmbedExample />} />
           
           {/* FSLI Detail Routes */}
           <Route path="/accounting/fsli/cash-and-cash-equivalents" element={<CashAndCashEquivalents />} />
