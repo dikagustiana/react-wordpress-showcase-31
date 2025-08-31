@@ -2,7 +2,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
+import Card from '../components/Card';
 import { 
   BookOpen, 
   MessageCircle, 
@@ -156,18 +156,16 @@ const EnglishIELTS = () => {
                     <div className={`w-12 h-12 ${step.color} rounded-lg flex items-center justify-center`}>
                       {step.highlight ? <Award className="w-6 h-6 text-white" /> : <CheckCircle className="w-6 h-6 text-white" />}
                     </div>
-                    <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg min-w-[200px]">
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold text-slate-800">{step.label}</h3>
-                        <p className="text-sm text-slate-600">{step.subtitle}</p>
-                        {step.highlight && (
-                          <div className="flex items-center mt-1">
-                            <Target className="w-4 h-4 text-orange-500 mr-1" />
-                            <span className="text-xs text-orange-600 font-medium">Target Achievement</span>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <div className="bg-white/95 backdrop-blur-sm border-0 shadow-lg min-w-[200px] rounded-lg p-4">
+                      <h3 className="font-semibold text-slate-800">{step.label}</h3>
+                      <p className="text-sm text-slate-600">{step.subtitle}</p>
+                      {step.highlight && (
+                        <div className="flex items-center mt-1">
+                          <Target className="w-4 h-4 text-orange-500 mr-1" />
+                          <span className="text-xs text-orange-600 font-medium">Target Achievement</span>
+                        </div>
+                      )}
+                    </div>
                     {index < pathwaySteps.length - 1 && (
                       <div className="w-px h-8 bg-blue-300 ml-6"></div>
                     )}
@@ -192,18 +190,22 @@ const EnglishIELTS = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {learningSteps.map((step, index) => (
-                <Card key={index} className="bg-muted/30 border-0 hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-8">
-                    <div className={`w-16 h-16 ${step.color} rounded-xl flex items-center justify-center mb-6`}>
-                      <step.icon className="w-8 h-8 text-white" />
+                <div 
+                  key={index} 
+                  className="bg-card-bg-light hover:bg-card-bg-light-hover rounded-[var(--card-radius)] shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] p-6 transition-all duration-300 font-plus-jakarta"
+                >
+                  <div className="flex justify-start mb-4">
+                    <div className="p-3 bg-card-icon-bg rounded-lg shadow-sm">
+                      <step.icon className="w-6 h-6 text-card-title" />
                     </div>
-                    <h3 className="text-xl font-bold text-foreground mb-3">{step.title}</h3>
-                    <p className="text-muted-foreground mb-6 leading-relaxed">{step.description}</p>
-                    <Button variant="outline" className="w-full">
-                      {step.buttonText}
-                    </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <h3 className="text-xl font-bold text-card-title mb-3">{step.title}</h3>
+                  <p className="text-card-description text-sm leading-relaxed mb-4">{step.description}</p>
+                  <div className="flex items-center text-card-cta font-semibold text-sm hover:underline">
+                    {step.buttonText}
+                    <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -223,29 +225,30 @@ const EnglishIELTS = () => {
             
             <div className="space-y-8">
               {practiceAreas.map((area, index) => (
-                <Card key={index} className="bg-white border shadow-sm hover:shadow-md transition-shadow duration-300">
-                  <CardContent className="p-8">
-                    <div className="flex items-start space-x-6">
-                      <div className={`w-16 h-16 ${area.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                        <area.icon className="w-8 h-8 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-foreground mb-3">{area.title}</h3>
-                        <p className="text-muted-foreground mb-4 leading-relaxed">{area.description}</p>
-                        <div className="flex flex-wrap gap-2">
-                          {area.tags.map((tag, tagIndex) => (
-                            <span 
-                              key={tagIndex} 
-                              className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                <div 
+                  key={index} 
+                  className="bg-card-bg-light hover:bg-card-bg-light-hover rounded-[var(--card-radius)] shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] p-6 transition-all duration-300 font-plus-jakarta"
+                >
+                  <div className="flex items-start space-x-6">
+                    <div className="p-3 bg-card-icon-bg rounded-lg shadow-sm flex-shrink-0">
+                      <area.icon className="w-6 h-6 text-card-title" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-card-title mb-3">{area.title}</h3>
+                      <p className="text-card-description text-sm leading-relaxed mb-4">{area.description}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {area.tags.map((tag, tagIndex) => (
+                          <span 
+                            key={tagIndex} 
+                            className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -265,24 +268,27 @@ const EnglishIELTS = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {extraTools.map((tool, index) => (
-                <Card key={index} className="bg-muted/20 border-0 hover:shadow-lg transition-shadow duration-300">
-                  <CardContent className="p-6 text-center">
-                    <div className={`w-16 h-16 ${tool.color} rounded-xl flex items-center justify-center mx-auto mb-6`}>
-                      <tool.icon className="w-8 h-8 text-white" />
+                <div 
+                  key={index} 
+                  className="bg-card-bg-light hover:bg-card-bg-light-hover rounded-[var(--card-radius)] shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] p-6 transition-all duration-300 font-plus-jakarta text-center"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="p-3 bg-card-icon-bg rounded-lg shadow-sm">
+                      <tool.icon className="w-6 h-6 text-card-title" />
                     </div>
-                    <h3 className="text-lg font-bold text-foreground mb-4">{tool.title}</h3>
-                    <div className="space-y-2">
-                      {tool.items.map((item, itemIndex) => (
-                        <div 
-                          key={itemIndex}
-                          className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium"
-                        >
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <h3 className="text-xl font-bold text-card-title mb-4">{tool.title}</h3>
+                  <div className="space-y-2">
+                    {tool.items.map((item, itemIndex) => (
+                      <div 
+                        key={itemIndex}
+                        className="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>

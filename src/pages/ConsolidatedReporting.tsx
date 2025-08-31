@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
-import { Card, CardContent } from '../components/ui/card';
 
 const ConsolidatedReporting = () => {
   const [activeTab, setActiveTab] = useState('sofp');
@@ -108,19 +107,17 @@ const ConsolidatedReporting = () => {
 
   const EducationalCard = ({ title, description, path }: { title: string; description: string; path: string }) => (
     <Link to={path} className="block group">
-      <Card className="h-full transition-all duration-200 hover:shadow-md hover:border-primary/30 cursor-pointer">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-card-foreground mb-3 group-hover:text-primary transition-colors">
-            {title}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            {description}
-          </p>
-          <span className="text-sm font-medium text-primary group-hover:underline">
-            Learn more →
-          </span>
-        </CardContent>
-      </Card>
+      <div className="bg-card-bg-light hover:bg-card-bg-light-hover rounded-[var(--card-radius)] shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] p-6 transition-all duration-300 font-plus-jakarta h-full cursor-pointer">
+        <h3 className="text-lg font-bold text-card-title mb-3 group-hover:text-primary transition-colors">
+          {title}
+        </h3>
+        <p className="text-sm text-card-description mb-4 leading-relaxed">
+          {description}
+        </p>
+        <span className="text-sm font-semibold text-card-cta group-hover:underline">
+          Learn more →
+        </span>
+      </div>
     </Link>
   );
 

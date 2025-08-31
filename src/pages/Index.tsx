@@ -115,25 +115,25 @@ const Index = () => {
               {learningDoors.map((door, index) => (
                 <div
                   key={door.path}
-                  className="group bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 animate-fade-in"
+                  className="group bg-card-bg-light hover:bg-card-bg-light-hover rounded-[var(--card-radius)] shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] p-6 transition-all duration-300 animate-fade-in font-plus-jakarta"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Icon */}
                   <div className="flex justify-center mb-4">
-                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                      <door.icon className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 bg-card-icon-bg rounded-lg shadow-sm flex items-center justify-center">
+                      <door.icon className="w-6 h-6 text-card-title" />
                     </div>
                   </div>
                   
                   {/* Content */}
                   <div className="text-center space-y-3">
-                    <h3 className="text-xl font-semibold text-foreground">
+                    <h3 className="text-xl font-bold text-card-title">
                       {door.title}
                     </h3>
-                    <p className="text-sm font-medium text-green-600">
+                    <p className="text-sm font-semibold text-card-cta">
                       {door.tagline}
                     </p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-sm text-card-description leading-relaxed">
                       {door.description}
                     </p>
                   </div>
