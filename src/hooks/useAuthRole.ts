@@ -8,32 +8,42 @@ interface AuthRole {
   isAdmin: boolean;
   loading: boolean;
   session: Session | null;
+  profile: any;
 }
 
 export const useAuthRole = (): AuthRole => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<'admin' | 'viewer' | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
 
       if (error) {
-        console.error('Error fetching user role:', error);
-        setRole('viewer' as const); // Default to viewer if error
+        console.error('Error fetching user profile:', error);
+        setRole('viewer' as const);
+        setProfile(null);
         return;
       }
 
-      setRole((data?.role as 'admin' | 'viewer') || 'viewer');
+      if (data) {
+        setRole(data.role as 'admin' | 'viewer');
+        setProfile(data);
+      } else {
+        setRole('viewer' as const);
+        setProfile(null);
+      }
     } catch (error) {
-      console.error('Error in fetchUserRole:', error);
+      console.error('Error in fetchUserProfile:', error);
       setRole('viewer' as const);
+      setProfile(null);
     }
   };
 
@@ -47,10 +57,11 @@ export const useAuthRole = (): AuthRole => {
         if (session?.user) {
           // Defer role fetching to avoid auth state deadlock
           setTimeout(() => {
-            fetchUserRole(session.user.id);
+            fetchUserProfile(session.user.id);
           }, 0);
         } else {
           setRole(null);
+          setProfile(null);
         }
         
         setLoading(false);
@@ -71,7 +82,7 @@ export const useAuthRole = (): AuthRole => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchUserRole(session.user.id);
+          await fetchUserProfile(session.user.id);
         }
         
         setLoading(false);
@@ -92,5 +103,6 @@ export const useAuthRole = (): AuthRole => {
     isAdmin: role === 'admin',
     loading,
     session,
+    profile,
   };
 };
