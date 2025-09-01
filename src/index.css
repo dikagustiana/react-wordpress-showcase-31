@@ -180,6 +180,9 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 210 40% 25%;
     --sidebar-ring: 210 100% 60%;
+  }
+}
+
 /* Admin Editing System Z-Index Stack */
 .admin-editing {
   /* Ensure edit mode styling */

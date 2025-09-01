@@ -58,12 +58,26 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   // Debug logging
   React.useEffect(() => {
     console.log('[DynamicFSLI] role=', role, 'isAdmin=', isAdmin, 'editMode=', editMode);
+    if (editMode) {
+      console.log('[QA] Edit Mode toggled ON - checking section buttons visibility');
+    }
   }, [role, isAdmin, editMode]);
 
   React.useEffect(() => {
     console.log('[DynamicFSLI] sections loaded:', sections.length);
     sections.forEach(section => {
-      console.log('[SectionRender]', section.key, section.id);
+      console.log('[SectionRender]', section.key, section.id, 'hasContent:', sectionHasContent(section.key));
+    });
+    
+    // Log which sections are found for this page
+    const sectionKeys = ['quick_facts', 'definition', 'recognition', 'measurement', 
+                         'presentation_example', 'journal_entry_examples', 'disclosure_items', 'common_mistakes'];
+    console.log('[QA] Page sections analysis:');
+    sectionKeys.forEach(key => {
+      const exists = sectionExists(key);
+      const hasContent = sectionHasContent(key);
+      const section = getSection(key);
+      console.log(`[QA] ${key}: exists=${exists}, hasContent=${hasContent}, id=${section?.id || 'none'}`);
     });
   }, [sections]);
 
@@ -87,7 +101,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
     return new Intl.NumberFormat('en-US').format(value);
   };
 
-  // Get section content as HTML - robust parsing
+  // Get section content as HTML - robust parsing with create fallback
   const getSectionContent = (key: string) => {
     const s = sections.find(x => x.key === key);
     if (!s) return '';
@@ -100,6 +114,17 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
       return t; // raw html
     }
     return '';
+  };
+
+  // Check if section exists and has content
+  const sectionExists = (key: string) => {
+    return sections.some(s => s.key === key);
+  };
+
+  // Check if section has content
+  const sectionHasContent = (key: string) => {
+    const content = getSectionContent(key);
+    return content.trim().length > 0;
   };
 
   // Get section by key
@@ -189,15 +214,71 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
     }
   };
 
-  // Handle section edit
-  const handleSectionEdit = (key: string) => {
+  // Handle section edit - create section if it doesn't exist
+  const handleSectionEdit = async (key: string) => {
     console.log('[Editor] open', { key });
     const section = getSection(key);
     if (section) {
       console.log('[Editor] open', { key, id: section.id });
+      console.log('[QA] Edit pressed for section ID:', section.id);
       setEditingSection(section.id);
     } else {
-      console.warn('[Editor] section not found for key:', key);
+      console.warn('[Editor] section not found for key:', key, '- creating new section');
+      await handleCreateSection(key);
+    }
+  };
+
+  // Create a new section for the current page
+  const handleCreateSection = async (key: string) => {
+    if (!page || !isAdmin) return;
+    
+    console.log('[QA] Creating new section for key:', key, 'page:', page.id);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Create new section with empty content
+      const { data, error } = await supabase
+        .from('fsli_sections')
+        .insert({
+          page_id: page.id,
+          key: key,
+          content: JSON.stringify({ type: 'html', content: '' }),
+          sort_order: sections.length + 1
+        })
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('[Section] Create error:', error);
+        toast({
+          title: "Failed to create section",
+          description: `Database error: ${error.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('[QA] Section created - ID:', data.id, 'Key:', key);
+      
+      // Add to local state
+      setSections(prev => [...prev, data]);
+      
+      // Start editing the new section
+      setEditingSection(data.id);
+      
+      toast({
+        title: "Section created",
+        description: `New ${key.replace('_', ' ')} section ready for editing.`,
+      });
+    } catch (error: any) {
+      console.error('[Section] Create error:', error);
+      toast({
+        title: "Failed to create section",
+        description: `Error: ${error?.message || 'Unknown error occurred'}`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -540,12 +621,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('quick_facts')}
-                    isEditing={editingSection === getSection('quick_facts')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('quick_facts') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('quick_facts')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('quick_facts')}
+                       isEditing={editingSection === getSection('quick_facts')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Definition */}
@@ -570,12 +663,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('definition')}
-                    isEditing={editingSection === getSection('definition')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('definition') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('definition')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('definition')}
+                       isEditing={editingSection === getSection('definition')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Recognition */}
@@ -600,12 +705,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('recognition')}
-                    isEditing={editingSection === getSection('recognition')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('recognition') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('recognition')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('recognition')}
+                       isEditing={editingSection === getSection('recognition')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Measurement */}
@@ -630,12 +747,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('measurement')}
-                    isEditing={editingSection === getSection('measurement')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('measurement') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('measurement')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('measurement')}
+                       isEditing={editingSection === getSection('measurement')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Presentation Example */}
@@ -660,12 +789,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('presentation_example')}
-                    isEditing={editingSection === getSection('presentation_example')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('presentation_example') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('presentation_example')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('presentation_example')}
+                       isEditing={editingSection === getSection('presentation_example')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Journal Entry Examples */}
@@ -690,12 +831,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('journal_entry_examples')}
-                    isEditing={editingSection === getSection('journal_entry_examples')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('journal_entry_examples') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('journal_entry_examples')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('journal_entry_examples')}
+                       isEditing={editingSection === getSection('journal_entry_examples')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Disclosure Items */}
@@ -720,12 +873,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('disclosure_items')}
-                    isEditing={editingSection === getSection('disclosure_items')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('disclosure_items') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('disclosure_items')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('disclosure_items')}
+                       isEditing={editingSection === getSection('disclosure_items')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Common Mistakes */}
@@ -750,12 +915,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('common_mistakes')}
-                    isEditing={editingSection === getSection('common_mistakes')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('common_mistakes') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('common_mistakes')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('common_mistakes')}
+                       isEditing={editingSection === getSection('common_mistakes')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* TODO Essay */}
@@ -780,12 +957,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                  <EssayAutoResize 
-                    content={getSectionContent('todo_essay')}
-                    isEditing={editingSection === getSection('todo_essay')?.id}
-                  />
-                </div>
+                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
+                   {!sectionExists('todo_essay') ? (
+                     <div className="flex items-center justify-center h-24 text-muted-foreground">
+                       <Button 
+                         variant="outline" 
+                         onClick={() => handleCreateSection('todo_essay')}
+                         className="text-sm"
+                       >
+                         No content yet — Create section
+                       </Button>
+                     </div>
+                   ) : (
+                     <EssayAutoResize 
+                       content={getSectionContent('todo_essay')}
+                       isEditing={editingSection === getSection('todo_essay')?.id}
+                     />
+                   )}
+                 </div>
               </section>
 
               {/* Embeds Section */}
