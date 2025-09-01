@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+export const normalizeSlug = (s: string) =>
+  decodeURIComponent(s || '').trim().toLowerCase().replaceAll('-', '_');
+
 export interface FSLIPage {
   id: string;
   slug: string;
@@ -55,10 +58,13 @@ export const useContent = (slug: string) => {
   // Fetch page data
   const fetchPage = async () => {
     try {
+      const normalizedSlug = normalizeSlug(slug);
+      console.log('[useContent] fetchPage - originalSlug:', slug, 'normalizedSlug:', normalizedSlug);
+      
       const { data, error } = await supabase
         .from('fsli_pages')
         .select('*')
-        .eq('slug', slug)
+        .eq('slug', normalizedSlug)
         .maybeSingle();
 
       if (error) throw error;
