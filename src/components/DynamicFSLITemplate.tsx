@@ -175,9 +175,9 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
             {/* Breadcrumb */}
             <Breadcrumb 
               items={[
-                { label: "Home", href: "/" },
-                { label: "FSLI", href: "/fsli" },
-                { label: page.title, href: `#` }
+                { label: "Home", path: "/" },
+                { label: "FSLI", path: "/fsli" },
+                { label: page.title }
               ]} 
             />
 

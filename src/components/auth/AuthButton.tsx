@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogIn, LogOut, User } from 'lucide-react';
 
 export const AuthButton: React.FC = () => {
-  const { user, isAdmin, loading } = useAuthRole();
+  const { user, isAdmin, loading, profile } = useAuthRole();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -51,6 +51,11 @@ export const AuthButton: React.FC = () => {
         {isAdmin && (
           <span className="bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-medium">
             Admin
+          </span>
+        )}
+        {!isAdmin && profile?.role && (
+          <span className="bg-muted text-muted-foreground px-2 py-1 rounded-md text-xs font-medium">
+            {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
           </span>
         )}
       </div>
