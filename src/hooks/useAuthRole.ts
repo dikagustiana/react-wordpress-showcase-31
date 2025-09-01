@@ -27,11 +27,21 @@ export const useAuthRole = (): AuthRole => {
     console.log('[Boot] Auth hook initialized');
   }, []);
 
-  const fetchUserRole = async (userId: string, userEmail?: string) => {
+  const fetchUserRole = async (userId: string, userEmail?: string, user?: User | null) => {
     try {
       console.log("Active User ID:", userId);
       console.log("Active User Email:", userEmail);
+      console.log("Active User App Metadata:", user?.app_metadata);
       
+      // First check JWT app_metadata
+      const jwtRole = user?.app_metadata?.role as 'admin' | 'viewer' | undefined;
+      if (jwtRole && ['admin', 'viewer'].includes(jwtRole)) {
+        console.log("Role from JWT metadata:", jwtRole);
+        setRole(jwtRole);
+        return;
+      }
+      
+      // Fallback to RPC call
       const { data: role, error } = await supabase.rpc('get_user_role');
 
       if (error) {
@@ -60,7 +70,7 @@ export const useAuthRole = (): AuthRole => {
         if (session?.user) {
           // Defer role fetching to avoid auth state deadlock
           setTimeout(() => {
-            fetchUserRole(session.user.id, session.user.email);
+            fetchUserRole(session.user.id, session.user.email, session.user);
           }, 0);
         } else {
           // Clear role state on logout
@@ -87,7 +97,7 @@ export const useAuthRole = (): AuthRole => {
         
         if (session?.user) {
           // Always fetch role from database after getting session
-          await fetchUserRole(session.user.id, session.user.email);
+          await fetchUserRole(session.user.id, session.user.email, session.user);
         }
         
         setLoading(false);
