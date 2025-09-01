@@ -28,6 +28,7 @@ import FinancialPlanningForecasting from "./pages/finance101/FinancialPlanningFo
 import Budgeting from "./pages/finance101/Budgeting";
 import CFAPrep from "./pages/finance101/CFAPrep";
 import EnglishIELTS from "./pages/EnglishIELTS";
+import Auth from "./pages/Auth";
 import BooksAcademia from "./pages/BooksAcademia";
 import Categories from "./pages/books/Categories";
 import Settings from "./pages/Settings";
@@ -170,6 +171,8 @@ const App = () => (
         <Route path="/forecasting/input" element={<ForecastingInput />} />
         <Route path="/forecasting/assumptions" element={<ForecastingAssumptions />} />
         <Route path="/forecasting/output" element={<ForecastingOutput />} />
+        
+        <Route path="/auth" element={<Auth />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>

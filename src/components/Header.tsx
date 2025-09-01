@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import { AuthButton } from '@/components/auth/AuthButton';
 const Header = () => {
   const location = useLocation();
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
@@ -34,7 +35,13 @@ const Header = () => {
   }];
   return <header className="sticky top-0 z-50 bg-primary shadow-lg">
       <div className="max-w-content mx-auto px-6">
-        <nav className="flex items-end justify-center h-16">
+        <nav className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <h1 className="text-lg font-semibold text-primary-foreground mr-8">
+              Finance & Accounting Hub
+            </h1>
+          </div>
+          <div className="flex items-end justify-center flex-1">
           <div className="flex space-x-1">
             {/* Home */}
             <Link to="/" className={`px-4 py-2 text-sm font-medium transition-colors rounded-md ${isActive('/') && location.pathname === '/' ? 'bg-primary-hover text-primary-foreground' : 'text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-hover'}`}>
@@ -109,6 +116,10 @@ const Header = () => {
             <Link to="/english-ielts" className={`px-4 py-2 text-sm font-medium transition-colors rounded-md ${isActive('/english-ielts') ? 'bg-primary-hover text-primary-foreground' : 'text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-hover'}`}>
               English IELTS
             </Link>
+          </div>
+          </div>
+          <div className="flex items-center">
+            <AuthButton />
           </div>
         </nav>
       </div>
