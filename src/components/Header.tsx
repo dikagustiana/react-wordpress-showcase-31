@@ -67,12 +67,12 @@ const Header = () => {
             
             {/* Role badge next to logo */}
             {role === 'admin' && (
-              <span className="ml-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+              <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium uppercase text-white" style={{ backgroundColor: '#16a34a' }}>
                 Admin
               </span>
             )}
             {role === 'viewer' && (
-              <span className="ml-2 bg-gray-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+              <span className="ml-2 px-2 py-1 rounded-full text-xs font-medium uppercase text-white" style={{ backgroundColor: '#9ca3af' }}>
                 Viewer
               </span>
             )}

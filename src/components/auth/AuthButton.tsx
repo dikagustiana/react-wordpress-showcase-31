@@ -49,12 +49,12 @@ export const AuthButton: React.FC = () => {
         <User className="w-4 h-4" />
         <span className="text-foreground">{user.email}</span>
         {role === 'admin' && (
-          <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <span className="px-2 py-1 rounded-full text-xs font-medium uppercase text-white" style={{ backgroundColor: '#16a34a' }}>
             Admin
           </span>
         )}
         {role === 'viewer' && (
-          <span className="bg-gray-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <span className="px-2 py-1 rounded-full text-xs font-medium uppercase text-white" style={{ backgroundColor: '#9ca3af' }}>
             Viewer
           </span>
         )}
