@@ -5,7 +5,7 @@ import { Settings, History, Users } from 'lucide-react';
 import { useAuthRole } from '@/hooks/useAuthRole';
 
 export const AdminToolbar: React.FC = () => {
-  const { isAdmin, profile } = useAuthRole();
+  const { isAdmin, user } = useAuthRole();
 
   if (!isAdmin) return null;
 
@@ -28,9 +28,9 @@ export const AdminToolbar: React.FC = () => {
         </div>
       </div>
       
-      {profile?.display_name && (
+      {user?.email && (
         <div className="text-xs text-muted-foreground mt-1">
-          {profile.display_name}
+          {user.email}
         </div>
       )}
     </div>

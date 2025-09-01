@@ -8,42 +8,37 @@ interface AuthRole {
   isAdmin: boolean;
   loading: boolean;
   session: Session | null;
-  profile: any;
 }
 
 export const useAuthRole = (): AuthRole => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<'admin' | 'viewer' | null>(null);
-  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
-        setRole('viewer' as const);
-        setProfile(null);
+        console.error('Error fetching user role:', error);
+        setRole('viewer');
         return;
       }
 
       if (data) {
         setRole(data.role as 'admin' | 'viewer');
-        setProfile(data);
       } else {
-        setRole('viewer' as const);
-        setProfile(null);
+        // If no role found, default to viewer
+        setRole('viewer');
       }
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      setRole('viewer' as const);
-      setProfile(null);
+      console.error('Error in fetchUserRole:', error);
+      setRole('viewer');
     }
   };
 
@@ -57,18 +52,18 @@ export const useAuthRole = (): AuthRole => {
         if (session?.user) {
           // Defer role fetching to avoid auth state deadlock
           setTimeout(() => {
-            fetchUserProfile(session.user.id);
+            fetchUserRole(session.user.id);
           }, 0);
         } else {
+          // Clear role state on logout
           setRole(null);
-          setProfile(null);
         }
         
         setLoading(false);
       }
     );
 
-    // Check for existing session
+    // Check for existing session on mount/refresh
     const initializeAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -82,7 +77,8 @@ export const useAuthRole = (): AuthRole => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchUserProfile(session.user.id);
+          // Always fetch role from database after getting session
+          await fetchUserRole(session.user.id);
         }
         
         setLoading(false);
@@ -103,6 +99,5 @@ export const useAuthRole = (): AuthRole => {
     isAdmin: role === 'admin',
     loading,
     session,
-    profile,
   };
 };

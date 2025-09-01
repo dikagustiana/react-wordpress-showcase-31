@@ -2,9 +2,11 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { AuthButton } from '@/components/auth/AuthButton';
+import { useAuthRole } from '@/hooks/useAuthRole';
 const Header = () => {
   const location = useLocation();
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  const { role } = useAuthRole();
   
   // Handle logo hover for auth dropdown
   const handleLogoMouseEnter = () => setHoveredMenu('logo');
@@ -62,6 +64,18 @@ const Header = () => {
             <h1 className="text-base font-medium text-primary-foreground whitespace-nowrap">
               Your Friendly Learning Buddy
             </h1>
+            
+            {/* Role badge next to logo */}
+            {role === 'admin' && (
+              <span className="ml-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                Admin
+              </span>
+            )}
+            {role === 'viewer' && (
+              <span className="ml-2 bg-gray-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                Viewer
+              </span>
+            )}
             
             {/* Login dropdown - appears under logo */}
             <div className={`absolute top-full left-0 mt-1 bg-background rounded-lg shadow-lg border py-2 px-3 z-[70] transition-all duration-200 ${hoveredMenu === 'logo' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
