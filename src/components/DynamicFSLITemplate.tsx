@@ -30,8 +30,16 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   const { role, isAdmin } = useRole();
   const canEdit = isAdmin || forceAdmin;
   const { editMode, setEditMode, editingSection, setEditingSection } = useEditMode();
-  const { page, sections, metrics, embeds, loading, updatePage, updateSection, updateMetric } = useContent(slug);
+  const { page, sections: originalSections, metrics, embeds, loading, updatePage, updateSection, updateMetric } = useContent(slug);
   const { toast } = useToast();
+  
+  // Local state for sections to handle immediate updates
+  const [sections, setSections] = useState(originalSections);
+  
+  // Sync with original sections when they change
+  useEffect(() => {
+    setSections(originalSections);
+  }, [originalSections]);
 
   // Log slug normalization for debugging
   useEffect(() => {
@@ -144,34 +152,49 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
 
   // Handle section edit
   const handleSectionEdit = (key: string) => {
-    console.log('[EditorOpen] for section key:', key);
+    console.log('[Editor] open', { key });
     const section = getSection(key);
     if (section) {
-      console.log('[EditorOpen] found section:', section.id);
+      console.log('[Editor] open', { key, id: section.id });
       setEditingSection(section.id);
+    } else {
+      console.warn('[Editor] section not found for key:', key);
     }
   };
 
   const handleSectionSave = async (content: string) => {
     if (editingSection && page) {
-      console.log('[Save] section', editingSection, 'len=', content.length);
+      console.log('[Editor] save', { id: editingSection, length: content.length });
       const formattedContent = JSON.stringify({
         type: 'html',
         content: content
       });
       
       try {
+        // Direct database update with proper logging
+        const { data, error } = await supabase
+          .from('fsli_sections')
+          .update({ content: formattedContent })
+          .eq('id', editingSection)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        console.log('[Editor] save ok', { id: editingSection, data });
+        
+        // Update local state
+        setSections(prev => prev.map(s => s.id === editingSection ? data : s));
+        
         await createRevision(page.id, editingSection, { content });
-        updateSection(editingSection, formattedContent);
         setEditingSection(null);
         
         toast({
           title: "Content updated",
           description: "Section saved successfully.",
         });
-        console.log('[Save] success for section:', editingSection);
       } catch (error) {
-        console.error('[SaveError]', error);
+        console.error('[Editor] save error', error);
         toast({
           title: "Save failed",
           description: "Failed to save section. Please try again.",
@@ -183,11 +206,27 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
 
   const handleSectionAutoSave = async (content: string) => {
     if (editingSection && page) {
+      console.log('[Editor] auto-save', { id: editingSection, length: content.length });
       const formattedContent = JSON.stringify({
         type: 'html',
         content: content
       });
-      updateSection(editingSection, formattedContent);
+      
+      try {
+        const { data, error } = await supabase
+          .from('fsli_sections')
+          .update({ content: formattedContent })
+          .eq('id', editingSection)
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        // Update local state immediately for auto-save
+        setSections(prev => prev.map(s => s.id === editingSection ? data : s));
+      } catch (error) {
+        console.error('[Editor] auto-save error', error);
+      }
     }
   };
 
@@ -282,8 +321,23 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
     <div className={`min-h-screen bg-background flex flex-col ${editMode ? 'admin-editing' : ''}`}>
       <Header />
       
-      {/* Admin Toolbar - Fixed positioning */}
-      {canEdit && (
+      {/* Admin Toolbar - Fixed positioning - Always visible when admin and editMode */}
+      {canEdit && editMode && (
+        <div className="fixed top-20 right-4 z-50">
+          <EnhancedAdminToolbar 
+            editMode={editMode}
+            onToggleEditMode={() => {
+              console.log('[AdminToolbar] Toggle edit mode from', editMode, 'to', !editMode);
+              setEditMode(!editMode);
+            }}
+            onOpenHistory={() => setShowRevisionHistory(true)}
+            onSaveAll={handleSaveAll}
+          />
+        </div>
+      )}
+      
+      {/* Regular admin toolbar when not in edit mode */}
+      {canEdit && !editMode && (
         <div className="fixed top-20 right-4 z-50">
           <EnhancedAdminToolbar 
             editMode={editMode}
@@ -312,9 +366,22 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
           
           <div className="bg-card rounded-lg p-8 shadow-sm border">
             {/* Header Section */}
-            <div data-editable className="mb-8">
-              <div className="edit-handle">
-                {canEdit && editMode && <EditButton onClick={handlePageHeaderEdit} />}
+            <div 
+              data-editable 
+              className={`mb-8 ${editMode ? 'cursor-pointer' : ''}`}
+              onClick={() => editMode && handlePageHeaderEdit()}
+            >
+              <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                {canEdit && editMode && (
+                  <EditButton 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('[Editor] Edit header clicked');
+                      handlePageHeaderEdit();
+                    }} 
+                    variant="outline"
+                  />
+                )}
               </div>
               <h1 className="text-h1 font-bold text-foreground mb-4">
                 {page.title}
@@ -326,9 +393,24 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               {/* Financial Data */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 {metrics.map((metric) => (
-                  <div key={metric.id} data-editable className="bg-muted/50 p-4 rounded-lg">
-                    <div className="edit-handle">
-                      {canEdit && editMode && <EditButton onClick={() => handleMetricEdit(metric)} />}
+                  <div 
+                    key={metric.id} 
+                    data-editable 
+                    className={`bg-muted/50 p-4 rounded-lg ${editMode ? 'cursor-pointer' : ''}`}
+                    onClick={() => editMode && handleMetricEdit(metric)}
+                  >
+                    <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                      {canEdit && editMode && (
+                        <EditButton 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('[Editor] Edit metric clicked', metric.id);
+                            handleMetricEdit(metric);
+                          }} 
+                          variant="outline"
+                          className="bg-white shadow-sm"
+                        />
+                      )}
                     </div>
                     <h3 className="font-semibold text-foreground mb-2">{metric.label}</h3>
                     <p className="text-2xl font-bold text-primary">
@@ -350,11 +432,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
             {/* Content Sections */}
             <div className="space-y-8">
               {/* Quick Facts */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('quick_facts')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Quick Facts</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('quick_facts')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Quick Facts clicked');
+                          handleSectionEdit('quick_facts');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -366,11 +462,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Definition */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('definition')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Definition</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('definition')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Definition clicked');
+                          handleSectionEdit('definition');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -382,11 +492,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Recognition */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('recognition')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Recognition</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('recognition')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Recognition clicked');
+                          handleSectionEdit('recognition');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -398,11 +522,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Measurement */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('measurement')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Measurement</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('measurement')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Measurement clicked');
+                          handleSectionEdit('measurement');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -414,11 +552,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Presentation Example */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('presentation_example')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Presentation Example</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('presentation_example')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Presentation Example clicked');
+                          handleSectionEdit('presentation_example');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -430,11 +582,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Journal Entry Examples */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('journal_entry_examples')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Journal Entry Examples</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('journal_entry_examples')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Journal Entry Examples clicked');
+                          handleSectionEdit('journal_entry_examples');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -446,11 +612,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Disclosure Items */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('disclosure_items')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Disclosure Items</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('disclosure_items')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Disclosure Items clicked'); 
+                          handleSectionEdit('disclosure_items');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -462,11 +642,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* Common Mistakes */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('common_mistakes')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Common Mistakes</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('common_mistakes')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit Common Mistakes clicked');
+                          handleSectionEdit('common_mistakes');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
@@ -478,11 +672,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               </section>
 
               {/* TODO Essay */}
-              <section data-editable className="border-b border-border pb-6 last:border-b-0">
+              <section 
+                data-editable 
+                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                onClick={() => editMode && handleSectionEdit('todo_essay')}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">TODO Essay</h3>
-                  <div className="edit-handle">
-                    {canEdit && editMode && <EditButton onClick={() => handleSectionEdit('todo_essay')} />}
+                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                    {canEdit && editMode && (
+                      <EditButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('[Editor] Edit TODO Essay clicked');
+                          handleSectionEdit('todo_essay');
+                        }}
+                        variant="outline"
+                        className="bg-white shadow-sm"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">

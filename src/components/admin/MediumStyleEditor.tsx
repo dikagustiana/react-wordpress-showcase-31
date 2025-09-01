@@ -59,9 +59,10 @@ export const MediumStyleEditor: React.FC<MediumStyleEditorProps> = ({
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Initialize content when modal opens
+  // Initialize content and focus when modal opens
   useEffect(() => {
     if (isOpen) {
+      console.log('[Editor] mounted');
       let initialContent = content;
       try {
         const parsed = JSON.parse(content);
@@ -72,6 +73,16 @@ export const MediumStyleEditor: React.FC<MediumStyleEditorProps> = ({
       setEditorContent(initialContent);
       setIsDirty(false);
       setLastSaved(new Date());
+      
+      // Focus the editor after a short delay to ensure modal is fully rendered
+      setTimeout(() => {
+        if (editorRef.current) {
+          editorRef.current.focus();
+          console.log('[Editor] focused successfully');
+        } else {
+          console.log('[Editor] focus failed - no ref');
+        }
+      }, 100);
     }
   }, [isOpen, content]);
 
@@ -282,7 +293,8 @@ export const MediumStyleEditor: React.FC<MediumStyleEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col z-[9999]"
+        style={{ zIndex: 9999 }}>
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             {title}

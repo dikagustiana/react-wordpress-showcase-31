@@ -4,7 +4,7 @@ import { Edit3 } from 'lucide-react';
 import { useAuthRole } from '@/hooks/useAuthRole';
 
 interface EditButtonProps {
-  onClick: () => void;
+  onClick: (e?: React.MouseEvent) => void;
   className?: string;
   variant?: 'default' | 'ghost' | 'outline' | 'secondary';
 }
@@ -22,7 +22,10 @@ export const EditButton: React.FC<EditButtonProps> = ({
     <Button
       variant={variant}
       size="sm"
-      onClick={onClick}
+      onClick={(e) => {
+        e?.stopPropagation();
+        onClick(e);
+      }}
       className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${className}`}
     >
       <Edit3 className="w-4 h-4 mr-1" />

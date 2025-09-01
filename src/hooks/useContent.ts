@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export const normalizeSlug = (s: string) =>
-  decodeURIComponent(s || '').trim().toLowerCase().replace(/-/g, '_');
+// Normalize slug - handle both hyphen and underscore formats  
+export const normalizeSlug = (s: string): string => {
+  return s.toLowerCase().trim();
+};
 
 export interface FSLIPage {
   id: string;

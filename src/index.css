@@ -196,7 +196,7 @@
     scroll-behavior: smooth;
   }
 
-  /* Scoped Edit Mode Styles - Only active when edit mode is ON */
+  /* Scoped Edit Mode Styles - Always visible edit controls when editMode=true */
   .admin-editing [data-editable] {
     position: relative;
     outline: 1px dashed hsl(var(--ring) / 0.6);
@@ -209,14 +209,14 @@
     outline-offset: 8px; 
   }
 
-  /* Edit button overlay that doesn't shift layout */
-  [data-editable] .edit-handle {
+  /* Edit button always visible in edit mode - no hover dependency */
+  .admin-editing [data-editable] .edit-handle {
     position: absolute;
     top: 8px; 
     right: 10px;
-    opacity: 0;
+    opacity: 1; /* Always visible when in edit mode */
     transition: opacity 0.15s;
-    z-index: 2;
+    z-index: 70;
   }
   
   .admin-editing [data-editable]:hover .edit-handle { 
