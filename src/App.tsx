@@ -60,33 +60,31 @@ import ForecastingInput from "./pages/forecasting/Input";
 import ForecastingAssumptions from "./pages/forecasting/Assumptions";
 import ForecastingOutput from "./pages/forecasting/Output";
 
-// Import FSLI components from template
-import {
-  CashAndCashEquivalents,
-  RestrictedCash,
-  TradeReceivablesNet,
-  ThirdParties,
-  RelatedParties,
-  OtherReceivablesNet,
-  DueFromGovernment,
-  InventoriesNet,
-  CorporateDividendTaxesReceivableCurrent,
-  AdvancesPrepaymentsC,
-  OtherCurrentAssets,
-  OtherNonCurrentAssets,
-  RestrictedCashNonCurrent,
-  TradeReceivablesNetNonCurrent,
-  FixedAssetsNet,
-  InvestmentProperties,
-  DeferredTaxAssets,
-  LongTermInvestments,
-  AdvancesPrepaymentsNonCurrent,
-  CorporateDividendTaxesReceivableNonCurrent,
-  OtherNonCurrentReceivables,
-  OilGasPropertiesNet,
-  RightOfUseAssetsNet,
-  OtherNonCurrentAssetsFinal
-} from "./components/FSLITemplate";
+// Import DynamicFSLITemplate for admin editing
+import { DynamicFSLITemplate } from "@/components/DynamicFSLITemplate";
+import { EnhancedAdminToolbar } from '@/components/admin/EnhancedAdminToolbar';
+import { useRole } from '@/contexts/RoleContext';
+import { useEditMode } from '@/contexts/EditModeContext';
+
+// FSLI Detail component using dynamic template
+const FSLIDetail = ({ slug }: { slug: string }) => <DynamicFSLITemplate slug={slug} />;
+
+// Global Admin Toolbar component
+const GlobalAdminToolbar = () => {
+  const { isAdmin } = useRole();
+  const { editMode, setEditMode } = useEditMode();
+  if (!isAdmin) return null;
+  return (
+    <div className="fixed top-20 right-4 z-[70]">
+      <EnhancedAdminToolbar
+        editMode={editMode}
+        onToggleEditMode={() => setEditMode(!editMode)}
+        onOpenHistory={() => console.log('[GlobalToolbar] open history')}
+        onSaveAll={() => console.log('[GlobalToolbar] save all')}
+      />
+    </div>
+  );
+};
 
 const queryClient = new QueryClient();
 
@@ -99,6 +97,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <WarningBanner />
+            <GlobalAdminToolbar />
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />
@@ -130,31 +129,31 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/embed-example" element={<EmbedExample />} />
           
-          {/* FSLI Detail Routes */}
-          <Route path="/accounting/fsli/cash-and-cash-equivalents" element={<CashAndCashEquivalents />} />
-          <Route path="/accounting/fsli/restricted-cash" element={<RestrictedCash />} />
-          <Route path="/accounting/fsli/trade-receivables-net" element={<TradeReceivablesNet />} />
-          <Route path="/accounting/fsli/third-parties" element={<ThirdParties />} />
-          <Route path="/accounting/fsli/related-parties" element={<RelatedParties />} />
-          <Route path="/accounting/fsli/other-receivables-net" element={<OtherReceivablesNet />} />
-          <Route path="/accounting/fsli/due-from-government" element={<DueFromGovernment />} />
-          <Route path="/accounting/fsli/inventories-net" element={<InventoriesNet />} />
-          <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-current" element={<CorporateDividendTaxesReceivableCurrent />} />
-          <Route path="/accounting/fsli/advances-prepayments-current" element={<AdvancesPrepaymentsC />} />
-          <Route path="/accounting/fsli/other-current-assets" element={<OtherCurrentAssets />} />
-          <Route path="/accounting/fsli/other-non-current-assets" element={<OtherNonCurrentAssets />} />
-          <Route path="/accounting/fsli/restricted-cash-non-current" element={<RestrictedCashNonCurrent />} />
-          <Route path="/accounting/fsli/trade-receivables-net-non-current" element={<TradeReceivablesNetNonCurrent />} />
-          <Route path="/accounting/fsli/fixed-assets-net" element={<FixedAssetsNet />} />
-          <Route path="/accounting/fsli/investment-properties" element={<InvestmentProperties />} />
-          <Route path="/accounting/fsli/deferred-tax-assets" element={<DeferredTaxAssets />} />
-          <Route path="/accounting/fsli/long-term-investments" element={<LongTermInvestments />} />
-          <Route path="/accounting/fsli/advances-prepayments-non-current" element={<AdvancesPrepaymentsNonCurrent />} />
-          <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-non-current" element={<CorporateDividendTaxesReceivableNonCurrent />} />
-          <Route path="/accounting/fsli/other-non-current-receivables" element={<OtherNonCurrentReceivables />} />
-          <Route path="/accounting/fsli/oil-gas-properties-net" element={<OilGasPropertiesNet />} />
-          <Route path="/accounting/fsli/right-of-use-assets-net" element={<RightOfUseAssetsNet />} />
-          <Route path="/accounting/fsli/other-non-current-assets-final" element={<OtherNonCurrentAssetsFinal />} />
+          {/* FSLI Detail Routes - Using DynamicFSLITemplate */}
+          <Route path="/accounting/fsli/cash-and-cash-equivalents" element={<FSLIDetail slug="cash_and_cash_equivalents" />} />
+          <Route path="/accounting/fsli/restricted-cash" element={<FSLIDetail slug="restricted_cash" />} />
+          <Route path="/accounting/fsli/trade-receivables-net" element={<FSLIDetail slug="trade_receivables_net" />} />
+          <Route path="/accounting/fsli/third-parties" element={<FSLIDetail slug="third_parties" />} />
+          <Route path="/accounting/fsli/related-parties" element={<FSLIDetail slug="related_parties" />} />
+          <Route path="/accounting/fsli/other-receivables-net" element={<FSLIDetail slug="other_receivables_net" />} />
+          <Route path="/accounting/fsli/due-from-government" element={<FSLIDetail slug="due_from_government" />} />
+          <Route path="/accounting/fsli/inventories-net" element={<FSLIDetail slug="inventories_net" />} />
+          <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-current" element={<FSLIDetail slug="corporate_dividend_taxes_receivable_current" />} />
+          <Route path="/accounting/fsli/advances-prepayments-current" element={<FSLIDetail slug="advances_prepayments_current" />} />
+          <Route path="/accounting/fsli/other-current-assets" element={<FSLIDetail slug="other_current_assets" />} />
+          <Route path="/accounting/fsli/other-non-current-assets" element={<FSLIDetail slug="other_non_current_assets" />} />
+          <Route path="/accounting/fsli/restricted-cash-non-current" element={<FSLIDetail slug="restricted_cash_non_current" />} />
+          <Route path="/accounting/fsli/trade-receivables-net-non-current" element={<FSLIDetail slug="trade_receivables_net_non_current" />} />
+          <Route path="/accounting/fsli/fixed-assets-net" element={<FSLIDetail slug="fixed_assets_net" />} />
+          <Route path="/accounting/fsli/investment-properties" element={<FSLIDetail slug="investment_properties" />} />
+          <Route path="/accounting/fsli/deferred-tax-assets" element={<FSLIDetail slug="deferred_tax_assets" />} />
+          <Route path="/accounting/fsli/long-term-investments" element={<FSLIDetail slug="long_term_investments" />} />
+          <Route path="/accounting/fsli/advances-prepayments-non-current" element={<FSLIDetail slug="advances_prepayments_non_current" />} />
+          <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-non-current" element={<FSLIDetail slug="corporate_dividend_taxes_receivable_non_current" />} />
+          <Route path="/accounting/fsli/other-non-current-receivables" element={<FSLIDetail slug="other_non_current_receivables" />} />
+          <Route path="/accounting/fsli/oil-gas-properties-net" element={<FSLIDetail slug="oil_gas_properties_net" />} />
+          <Route path="/accounting/fsli/right-of-use-assets-net" element={<FSLIDetail slug="right_of_use_assets_net" />} />
+          <Route path="/accounting/fsli/other-non-current-assets-final" element={<FSLIDetail slug="other_non_current_assets_final" />} />
           
           {/* Consolidation Detail Routes */}
           <Route path="/accounting/consolidation/psak-principles" element={<PSAKPrinciples />} />
