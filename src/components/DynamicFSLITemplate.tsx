@@ -28,6 +28,7 @@ interface DynamicFSLITemplateProps {
 export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }) => {
   const forceAdmin = false; // Debug flag - set to true to force admin UI
   const { role, isAdmin } = useRole();
+  const canEdit = isAdmin || forceAdmin;
   const { editMode, setEditMode, editingSection, setEditingSection } = useEditMode();
   const { page, sections, metrics, embeds, loading, updatePage, updateSection, updateMetric } = useContent(slug);
   const { toast } = useToast();
@@ -275,7 +276,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
       <Header />
       
       {/* Admin Toolbar - Fixed positioning */}
-      {(isAdmin || forceAdmin) && (
+      {canEdit && (
         <div className="fixed top-20 right-4 z-50">
           <EnhancedAdminToolbar 
             editMode={editMode}
@@ -321,7 +322,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     </p>
                   )}
                 </div>
-                {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={handlePageHeaderEdit} />}
+                {(canEdit && editMode) && <EditButton onClick={handlePageHeaderEdit} />}
               </div>
             </div>
 
@@ -338,7 +339,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                         {formatValue(metric.value, metric.unit)}
                       </p>
                     </div>
-                    {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={() => handleMetricEdit(metric)} />}
+                    {(canEdit && editMode) && <EditButton onClick={() => handleMetricEdit(metric)} />}
                   </div>
                 </div>
               ))}
@@ -350,7 +351,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Quick Facts</h2>
-                  {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={() => handleSectionEdit('quick_facts')} />}
+                  {(canEdit && editMode) && <EditButton onClick={() => handleSectionEdit('quick_facts')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
@@ -364,7 +365,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Definition</h2>
-                  {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={() => handleSectionEdit('definition')} />}
+                  {(canEdit && editMode) && <EditButton onClick={() => handleSectionEdit('definition')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
@@ -378,7 +379,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Recognition</h2>
-                  {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={() => handleSectionEdit('recognition')} />}
+                  {(canEdit && editMode) && <EditButton onClick={() => handleSectionEdit('recognition')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
@@ -392,7 +393,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Measurement</h2>
-                  {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={() => handleSectionEdit('measurement')} />}
+                  {(canEdit && editMode) && <EditButton onClick={() => handleSectionEdit('measurement')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
@@ -406,7 +407,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Disclosure</h2>
-                  {((isAdmin || forceAdmin) && editMode) && <EditButton onClick={() => handleSectionEdit('disclosure')} />}
+                  {(canEdit && editMode) && <EditButton onClick={() => handleSectionEdit('disclosure')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
