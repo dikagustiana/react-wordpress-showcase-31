@@ -19,12 +19,10 @@ export const EnhancedAdminToolbar: React.FC<EnhancedAdminToolbarProps> = ({
 }) => {
   const { isAdmin, user } = useAuthRole();
 
-  if (!isAdmin) return null;
-
   // Keyboard shortcut handler
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'e' && (e.ctrlKey || e.metaKey)) {
+      if (e.key?.toLowerCase() === 'e' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         onToggleEditMode();
       }
@@ -33,6 +31,8 @@ export const EnhancedAdminToolbar: React.FC<EnhancedAdminToolbarProps> = ({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onToggleEditMode]);
+
+  if (!isAdmin) return null;
 
   return (
     <div className="fixed top-20 right-4 z-50 bg-card border rounded-lg shadow-lg p-3">

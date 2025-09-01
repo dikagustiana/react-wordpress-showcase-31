@@ -25,7 +25,7 @@ export const EditModeProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Keyboard shortcut for edit mode toggle
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'e' && (e.ctrlKey || e.metaKey)) {
+      if (e.key?.toLowerCase() === 'e' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         setEditMode(prev => !prev);
         console.log('[EditModeContext] Toggle via keyboard shortcut');
