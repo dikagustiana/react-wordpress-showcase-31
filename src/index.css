@@ -209,14 +209,14 @@
     outline-offset: 8px; 
   }
 
-  /* Edit button always visible in edit mode - no hover dependency */
+  /* Edit button always visible in edit mode - higher z-index for dialog overlap */
   .admin-editing [data-editable] .edit-handle {
     position: absolute;
     top: 8px; 
     right: 10px;
     opacity: 1; /* Always visible when in edit mode */
     transition: opacity 0.15s;
-    z-index: 70;
+    z-index: 9998; /* Just below modal z-index */
   }
   
   .admin-editing [data-editable]:hover .edit-handle { 
