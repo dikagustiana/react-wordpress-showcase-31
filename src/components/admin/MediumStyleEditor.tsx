@@ -270,14 +270,26 @@ export const MediumStyleEditor: React.FC<MediumStyleEditorProps> = ({
   };
 
   const handleSave = () => {
-    onSave(editorContent);
-    setLastSaved(new Date());
-    setIsDirty(false);
-    onClose();
-    toast({
-      title: "Content saved",
-      description: "Your changes have been saved successfully.",
-    });
+    console.log('[QA] Editor save triggered - Content length:', editorContent.length);
+    
+    try {
+      onSave(editorContent);
+      setLastSaved(new Date());
+      setIsDirty(false);
+      onClose();
+      
+      toast({
+        title: "Saved",
+        description: "Content saved successfully.",
+      });
+    } catch (error: any) {
+      console.error('[Editor] Save error:', error);
+      toast({
+        title: "Save failed",
+        description: `Error: ${error?.message || 'Unknown error occurred'}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const slashMenuItems = [
@@ -293,8 +305,7 @@ export const MediumStyleEditor: React.FC<MediumStyleEditorProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col z-[9999]"
-        style={{ zIndex: 9999 }}>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col z-[200]" style={{ zIndex: 200 }}>
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             {title}
@@ -390,7 +401,7 @@ export const MediumStyleEditor: React.FC<MediumStyleEditorProps> = ({
           {/* Slash Menu */}
           {showSlashMenu && (
             <div 
-              className="fixed bg-popover border rounded-lg shadow-lg p-2 min-w-[200px] z-50"
+              className="fixed bg-popover border rounded-lg shadow-lg p-2 min-w-[200px] z-[250]"
               style={{ 
                 top: slashPosition.top, 
                 left: slashPosition.left 

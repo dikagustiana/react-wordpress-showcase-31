@@ -15,6 +15,7 @@ export const RoleProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Debug logging
   React.useEffect(() => {
     console.log('[RoleContext] role=', role, 'isAdmin=', isAdmin, 'loading=', loading);
+    console.log('[QA] App started - User role:', role || 'Not authenticated');
   }, [role, isAdmin, loading]);
 
   return (

@@ -180,7 +180,65 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 210 40% 25%;
     --sidebar-ring: 210 100% 60%;
-  }
+/* Admin Editing System Z-Index Stack */
+.admin-editing {
+  /* Ensure edit mode styling */
+}
+
+/* Z-Index hierarchy for admin editing */
+.admin-toolbar { z-index: 100; }
+.edit-button { z-index: 80; }
+.section-editor { z-index: 200; }
+.editor-toolbar { z-index: 250; }
+.modal-overlay { z-index: 150; }
+
+/* Edit handles styling */
+.edit-handle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 80;
+}
+
+/* Hover states for editable elements */
+[data-editable]:hover .edit-handle {
+  opacity: 1;
+}
+
+[data-editable] .edit-handle {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Edit mode visible handles */
+.admin-editing [data-editable] .edit-handle {
+  opacity: 1;
+}
+
+/* Prevent text selection during edit mode */
+.admin-editing [data-editable] {
+  position: relative;
+}
+
+/* Status indicators */
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.save-status .spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @layer base {

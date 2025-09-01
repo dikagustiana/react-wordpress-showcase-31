@@ -139,13 +139,52 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   };
 
   const handleSavePageHeader = async () => {
-    if (page) {
-      await createRevision(page.id, undefined, { ...page, ...pageHeaderData });
-      updatePage(pageHeaderData);
+    if (!page) return;
+    
+    console.log('[QA] Saving header - data:', pageHeaderData);
+    
+    try {
+      // Prepare data with safe empty values
+      const updateData = {
+        title: pageHeaderData.title || page.title,
+        subtitle: pageHeaderData.subtitle || null, // Safe empty value
+        notes_ref: pageHeaderData.notes_ref || null // Safe empty value
+      };
+      
+      console.log('[QA] Header update data:', updateData);
+      
+      // Direct database update with better error handling
+      const { error } = await supabase
+        .from('fsli_pages')
+        .update(updateData)
+        .eq('id', page.id);
+        
+      if (error) {
+        console.error('[Header] Save error:', error);
+        toast({
+          title: "Failed to save header",
+          description: `Database error: ${error.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      await createRevision(page.id, undefined, { ...page, ...updateData });
+      updatePage(updateData);
       setEditingPageHeader(false);
+      
       toast({
-        title: "Page header updated",
-        description: "Changes saved successfully.",
+        title: "Saved",
+        description: "Page header updated successfully.",
+      });
+      
+      console.log('[QA] Header saved successfully');
+    } catch (error: any) {
+      console.error('[Header] Save error:', error);
+      toast({
+        title: "Failed to save header", 
+        description: `Error: ${error?.message || 'Unknown error occurred'}`,
+        variant: "destructive",
       });
     }
   };
@@ -163,44 +202,53 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   };
 
   const handleSectionSave = async (content: string) => {
-    if (editingSection && page) {
-      console.log('[Editor] save', { id: editingSection, length: content.length });
-      const formattedContent = JSON.stringify({
-        type: 'html',
-        content: content
-      });
+    if (!editingSection || !page) return;
+    
+    console.log('[QA] Saving section - ID:', editingSection, 'Content length:', content.length);
+    
+    const formattedContent = JSON.stringify({
+      type: 'html',
+      content: content
+    });
+    
+    try {
+      // Direct database update with proper error handling
+      const { data, error } = await supabase
+        .from('fsli_sections')
+        .update({ content: formattedContent })
+        .eq('id', editingSection)
+        .select()
+        .single();
       
-      try {
-        // Direct database update with proper logging
-        const { data, error } = await supabase
-          .from('fsli_sections')
-          .update({ content: formattedContent })
-          .eq('id', editingSection)
-          .select()
-          .single();
-        
-        if (error) throw error;
-        
-        console.log('[Editor] save ok', { id: editingSection, data });
-        
-        // Update local state
-        setSections(prev => prev.map(s => s.id === editingSection ? data : s));
-        
-        await createRevision(page.id, editingSection, { content });
-        setEditingSection(null);
-        
+      if (error) {
+        console.error('[Section] Save error:', error);
         toast({
-          title: "Content updated",
-          description: "Section saved successfully.",
-        });
-      } catch (error) {
-        console.error('[Editor] save error', error);
-        toast({
-          title: "Save failed",
-          description: "Failed to save section. Please try again.",
+          title: "Failed to save section",
+          description: `Database error: ${error.message}`,
           variant: "destructive",
         });
+        return;
       }
+      
+      console.log('[QA] Section saved - ID:', editingSection, 'Success');
+      
+      // Update local state
+      setSections(prev => prev.map(s => s.id === editingSection ? data : s));
+      
+      await createRevision(page.id, editingSection, { content });
+      setEditingSection(null);
+      
+      toast({
+        title: "Saved",
+        description: "Section content updated successfully.",
+      });
+    } catch (error: any) {
+      console.error('[Section] Save error:', error);
+      toast({
+        title: "Failed to save section",
+        description: `Error: ${error?.message || 'Network error occurred'}`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -236,14 +284,53 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   };
 
   const handleMetricSave = async (updates: Partial<FSLIMetric>) => {
-    if (editingMetric && page) {
+    if (!editingMetric || !page) return;
+    
+    console.log('[QA] Saving metric - ID:', editingMetric.id, 'Updates:', updates);
+    
+    try {
+      // Validate numeric value if provided
+      if (updates.value !== undefined && isNaN(Number(updates.value))) {
+        toast({
+          title: "Invalid value", 
+          description: "Metric value must be a valid number.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Direct database update with proper error handling
+      const { error } = await supabase
+        .from('fsli_metrics')
+        .update(updates)
+        .eq('id', editingMetric.id);
+        
+      if (error) {
+        console.error('[Metric] Save error:', error);
+        toast({
+          title: "Failed to save metric",
+          description: `Database error: ${error.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('[QA] Metric saved - ID:', editingMetric.id, 'Success');
+      
       await createRevision(page.id, undefined, { metric: { ...editingMetric, ...updates } });
       updateMetric(editingMetric.id, updates);
       setEditingMetric(null);
       
       toast({
-        title: "Metric updated",
-        description: "Changes saved successfully.",
+        title: "Saved",
+        description: "Metric updated successfully.",
+      });
+    } catch (error: any) {
+      console.error('[Metric] Save error:', error);
+      toast({
+        title: "Failed to save metric",
+        description: `Error: ${error?.message || 'Unknown error occurred'}`,
+        variant: "destructive",
       });
     }
   };
@@ -371,7 +458,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               className={`mb-8 ${editMode ? 'cursor-pointer' : ''}`}
               onClick={() => editMode && handlePageHeaderEdit()}
             >
-              <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+        <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                 {canEdit && editMode && (
                   <EditButton 
                     onClick={(e) => {
@@ -399,7 +486,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     className={`bg-muted/50 p-4 rounded-lg ${editMode ? 'cursor-pointer' : ''}`}
                     onClick={() => editMode && handleMetricEdit(metric)}
                   >
-                    <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+            <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                       {canEdit && editMode && (
                         <EditButton 
                           onClick={(e) => {
@@ -439,7 +526,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Quick Facts</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -469,7 +556,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Definition</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -499,7 +586,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Recognition</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -529,7 +616,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Measurement</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -559,7 +646,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Presentation Example</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -589,7 +676,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Journal Entry Examples</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -619,7 +706,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Disclosure Items</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -649,7 +736,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">Common Mistakes</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -679,7 +766,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-h3 font-semibold text-foreground">TODO Essay</h3>
-                  <div className="edit-handle" style={{ zIndex: 70, pointerEvents: 'auto' }}>
+                  <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
                         onClick={(e) => {
@@ -741,7 +828,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
 
       {/* Page Header Editor */}
       <Dialog open={editingPageHeader} onOpenChange={setEditingPageHeader}>
-        <DialogContent>
+        <DialogContent className="z-[150]">
           <DialogHeader>
             <DialogTitle>Edit Page Header</DialogTitle>
           </DialogHeader>
@@ -753,25 +840,27 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                 id="page-title"
                 value={pageHeaderData.title}
                 onChange={(e) => setPageHeaderData(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Enter page title"
               />
             </div>
             
             <div>
-              <Label htmlFor="page-subtitle">Subtitle</Label>
+              <Label htmlFor="page-subtitle">Subtitle (Optional)</Label>
               <Input
                 id="page-subtitle"
                 value={pageHeaderData.subtitle}
                 onChange={(e) => setPageHeaderData(prev => ({ ...prev, subtitle: e.target.value }))}
+                placeholder="Enter subtitle (leave empty if not needed)"
               />
             </div>
             
             <div>
-              <Label htmlFor="page-notes">Notes Reference</Label>
+              <Label htmlFor="page-notes">Notes Reference (Optional)</Label>
               <Input
                 id="page-notes"
                 value={pageHeaderData.notes_ref}
                 onChange={(e) => setPageHeaderData(prev => ({ ...prev, notes_ref: e.target.value }))}
-                placeholder="e.g., 3i.6"
+                placeholder="e.g., 3i.6 (leave empty if not needed)"
               />
             </div>
           </div>

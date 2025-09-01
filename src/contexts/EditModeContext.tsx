@@ -16,10 +16,14 @@ export const EditModeProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Debug logging for edit mode changes
   React.useEffect(() => {
     console.log('[EditModeContext] editMode=', editMode);
+    console.log('[QA] Edit Mode toggled to:', editMode ? 'ON' : 'OFF');
   }, [editMode]);
 
   React.useEffect(() => {
     console.log('[EditModeContext] editingSection=', editingSection);
+    if (editingSection) {
+      console.log('[QA] Edit pressed for section ID:', editingSection);
+    }
   }, [editingSection]);
 
   // Keyboard shortcut for edit mode toggle

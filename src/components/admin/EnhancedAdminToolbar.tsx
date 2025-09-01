@@ -35,7 +35,7 @@ export const EnhancedAdminToolbar: React.FC<EnhancedAdminToolbarProps> = ({
   if (!isAdmin) return null;
 
   return (
-    <div className="fixed top-20 right-4 z-50 bg-card border rounded-lg shadow-lg p-3">
+    <div className="fixed top-20 right-4 z-[100] bg-card border rounded-lg shadow-lg p-3">
       <div className="flex items-center gap-3">
         <Badge variant="secondary" className="flex items-center gap-1">
           <Users className="w-3 h-3" />
