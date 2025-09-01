@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Breadcrumb from '@/components/Breadcrumb';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useContent, FSLISection, FSLIMetric } from '@/hooks/useContent';
+import { useContent, FSLISection, FSLIMetric, normalizeSlug } from '@/hooks/useContent';
 import { useRole } from '@/contexts/RoleContext';
 import { useEditMode } from '@/contexts/EditModeContext';
 import { useToast } from '@/hooks/use-toast';
@@ -32,6 +32,11 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   const { editMode, setEditMode, editingSection, setEditingSection } = useEditMode();
   const { page, sections, metrics, embeds, loading, updatePage, updateSection, updateMetric } = useContent(slug);
   const { toast } = useToast();
+
+  // Log slug normalization for debugging
+  useEffect(() => {
+    console.log('[FSLI] routeSlug=', slug, 'normalized=', normalizeSlug(slug));
+  }, [slug]);
   
   const [editingMetric, setEditingMetric] = useState<FSLIMetric | null>(null);
   const [editingPageHeader, setEditingPageHeader] = useState(false);

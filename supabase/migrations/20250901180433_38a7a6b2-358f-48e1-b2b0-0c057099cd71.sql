@@ -1,0 +1,27 @@
+-- Seed FSLI pages to ensure all routes have corresponding database entries
+INSERT INTO public.fsli_pages (slug, title) VALUES
+('cash_and_cash_equivalents','Cash and cash equivalents'),
+('restricted_cash','Restricted cash'),
+('trade_receivables_net','Trade receivables, net'),
+('third_parties','Third parties'),
+('related_parties','Related parties'),
+('other_receivables_net','Other receivables, net'),
+('due_from_government','Due from the Government'),
+('inventories_net','Inventories, net'),
+('corporate_dividend_taxes_receivable_current','Corporate & dividend taxes receivable – current'),
+('advances_prepayments_current','Advances & prepayments – current'),
+('other_current_assets','Other current assets'),
+('other_non_current_assets','Other non-current assets'),
+('restricted_cash_non_current','Restricted cash – non-current'),
+('trade_receivables_net_non_current','Trade receivables, net – non-current'),
+('fixed_assets_net','Fixed assets, net'),
+('investment_properties','Investment properties'),
+('deferred_tax_assets','Deferred tax assets'),
+('long_term_investments','Long-term investments'),
+('advances_prepayments_non_current','Advances & prepayments – non-current'),
+('corporate_dividend_taxes_receivable_non_current','Corporate & dividend taxes receivable – non-current'),
+('other_non_current_receivables','Other non-current receivables'),
+('oil_gas_properties_net','Oil & gas properties, net'),
+('right_of_use_assets_net','Right-of-use assets, net'),
+('other_non_current_assets_final','Other non-current assets (final)')
+ON CONFLICT (slug) DO NOTHING;
