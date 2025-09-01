@@ -62,29 +62,9 @@ import ForecastingOutput from "./pages/forecasting/Output";
 
 // Import DynamicFSLITemplate for admin editing
 import { DynamicFSLITemplate } from "@/components/DynamicFSLITemplate";
-import { EnhancedAdminToolbar } from '@/components/admin/EnhancedAdminToolbar';
-import { useRole } from '@/contexts/RoleContext';
-import { useEditMode } from '@/contexts/EditModeContext';
 
 // FSLI Detail component using dynamic template
 const FSLIDetail = ({ slug }: { slug: string }) => <DynamicFSLITemplate slug={slug} />;
-
-// Global Admin Toolbar component
-const GlobalAdminToolbar = () => {
-  const { isAdmin } = useRole();
-  const { editMode, setEditMode } = useEditMode();
-  if (!isAdmin) return null;
-  return (
-    <div className="fixed top-20 right-4 z-[70]">
-      <EnhancedAdminToolbar
-        editMode={editMode}
-        onToggleEditMode={() => setEditMode(!editMode)}
-        onOpenHistory={() => console.log('[GlobalToolbar] open history')}
-        onSaveAll={() => console.log('[GlobalToolbar] save all')}
-      />
-    </div>
-  );
-};
 
 const queryClient = new QueryClient();
 
@@ -97,7 +77,6 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <WarningBanner />
-            <GlobalAdminToolbar />
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />
