@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { AuthButton } from '@/components/auth/AuthButton';
 const Header = () => {
@@ -37,81 +37,92 @@ const Header = () => {
     label: 'CFA Prep',
     path: '/finance-101/cfa-prep'
   }];
+  const mainNavItems = [
+    { label: 'Home', path: '/' },
+    { label: 'Finance Workspace', path: '/finance-workspace' },
+    { label: 'Critical Thinking and Research', path: '/critical-thinking-research' },
+    { label: 'Books and Academia', path: '/books-academia' },
+    { label: 'English IELTS', path: '/english-ielts' }
+  ];
+
   return <header className="sticky top-0 z-50 bg-primary shadow-lg">
-      <div className="max-w-full mx-auto px-6">
-        <nav className="flex items-center justify-between h-16">
-          {/* Logo with hidden Auth dropdown */}
+      <div className="max-w-[1240px] mx-auto px-6">
+        <nav className="flex items-center h-16">
+          {/* Logo with Login dropdown */}
           <div 
-            className="relative group flex items-center" 
+            className="relative flex items-center cursor-pointer" 
             onMouseEnter={handleLogoMouseEnter} 
             onMouseLeave={handleLogoMouseLeave}
           >
-            <h1 className="text-lg font-semibold text-primary-foreground cursor-pointer">
-              Finance & Accounting Hub
+            <img 
+              src="/lovable-uploads/e4fef01c-e480-414e-8764-4044cb4cc1aa.png" 
+              alt="Your Friendly Learning Buddy Logo" 
+              className="w-8 h-8 mr-3 object-contain"
+            />
+            <h1 className="text-base font-medium text-primary-foreground whitespace-nowrap">
+              Your Friendly Learning Buddy
             </h1>
-            {/* Hidden Auth Button - appears on logo hover */}
-            <div className={`absolute top-full left-0 mt-2 transition-all duration-300 ease-in-out z-[70] ${hoveredMenu === 'logo' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+            
+            {/* Login dropdown - appears under logo */}
+            <div className={`absolute top-full left-0 mt-1 bg-background rounded-lg shadow-lg border py-2 px-3 z-[70] transition-all duration-200 ${hoveredMenu === 'logo' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
               <AuthButton />
             </div>
           </div>
 
-          {/* Navigation Menu - Center aligned */}
-          <div className="flex-1 flex justify-center">
-            <div className="flex items-center space-x-8">
-              {/* Home */}
-              <Link to="/" className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/') && location.pathname === '/' ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
-                Home
-              </Link>
-
-              {/* Finance Workspace */}
-              <Link to="/finance-workspace" className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/finance-workspace') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
-                Finance Workspace
-              </Link>
-
-              {/* Critical Thinking and Research */}
-              <Link to="/critical-thinking-research" className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/critical-thinking-research') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
-                Critical Thinking and Research
-              </Link>
+          {/* Navigation Menu - Compact spacing */}
+          <div className="flex-1 flex justify-center ml-8">
+            <div className="flex items-center gap-5">
+              {/* Main navigation items */}
+              {mainNavItems.map((item) => (
+                <Link 
+                  key={item.path}
+                  to={item.path} 
+                  className={`px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${
+                    isActive(item.path) && (item.path === '/' ? location.pathname === '/' : true)
+                      ? 'text-primary-foreground bg-primary-hover' 
+                      : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
 
               {/* Accounting with Dropdown */}
-              <div className="relative group" onMouseEnter={() => setHoveredMenu('accounting')} onMouseLeave={() => setHoveredMenu(null)}>
-                <Link to="/accounting" className={`flex items-center px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/accounting') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
+              <div className="relative" onMouseEnter={() => setHoveredMenu('accounting')} onMouseLeave={() => setHoveredMenu(null)}>
+                <Link to="/accounting" className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${isActive('/accounting') ? 'text-primary-foreground bg-primary-hover' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'}`}>
                   Accounting
-                  <ChevronDown className={`ml-1 w-4 h-4 transition-transform duration-200 ${hoveredMenu === 'accounting' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === 'accounting' ? 'rotate-180' : ''}`} />
                 </Link>
                 
-                {/* Dropdown Menu */}
-                <div className={`absolute top-full left-0 mt-1 w-64 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-200 ${hoveredMenu === 'accounting' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                  {accountingSubmenu.map((item, index) => <Link key={item.path} to={item.path} className="block px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover transition-colors border-b border-primary-hover/30 last:border-b-0" onClick={() => setHoveredMenu(null)}>
+                <div className={`absolute top-full left-0 mt-1 w-64 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === 'accounting' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                  {accountingSubmenu.map((item) => <Link key={item.path} to={item.path} className="block px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover transition-colors border-b border-primary-hover/30 last:border-b-0" onClick={() => setHoveredMenu(null)}>
                       {item.label}
                     </Link>)}
                 </div>
               </div>
 
               {/* Finance 101 with Dropdown */}
-              <div className="relative group" onMouseEnter={() => setHoveredMenu('finance101')} onMouseLeave={() => setHoveredMenu(null)}>
-                <Link to="/finance-101" className={`flex items-center px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/finance-101') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
+              <div className="relative" onMouseEnter={() => setHoveredMenu('finance101')} onMouseLeave={() => setHoveredMenu(null)}>
+                <Link to="/finance-101" className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${isActive('/finance-101') ? 'text-primary-foreground bg-primary-hover' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'}`}>
                   Finance 101
-                  <ChevronDown className={`ml-1 w-4 h-4 transition-transform duration-200 ${hoveredMenu === 'finance101' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === 'finance101' ? 'rotate-180' : ''}`} />
                 </Link>
                 
-                {/* Dropdown Menu */}
-                <div className={`absolute top-full left-0 mt-1 w-72 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-200 ${hoveredMenu === 'finance101' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                  {finance101Submenu.map((item, index) => <Link key={item.path} to={item.path} className="block px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover transition-colors border-b border-primary-hover/30 last:border-b-0" onClick={() => setHoveredMenu(null)}>
+                <div className={`absolute top-full left-0 mt-1 w-72 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === 'finance101' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                  {finance101Submenu.map((item) => <Link key={item.path} to={item.path} className="block px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover transition-colors border-b border-primary-hover/30 last:border-b-0" onClick={() => setHoveredMenu(null)}>
                       {item.label}
                     </Link>)}
                 </div>
               </div>
 
               {/* Green Transition with Dropdown */}
-              <div className="relative group" onMouseEnter={() => setHoveredMenu('green-transition')} onMouseLeave={() => setHoveredMenu(null)}>
-                <Link to="/green-transition" className={`flex items-center px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/green-transition') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
+              <div className="relative" onMouseEnter={() => setHoveredMenu('green-transition')} onMouseLeave={() => setHoveredMenu(null)}>
+                <Link to="/green-transition" className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${isActive('/green-transition') ? 'text-primary-foreground bg-primary-hover' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'}`}>
                   The Green Transition
-                  <ChevronDown className={`ml-1 w-4 h-4 transition-transform duration-200 ${hoveredMenu === 'green-transition' ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === 'green-transition' ? 'rotate-180' : ''}`} />
                 </Link>
                 
-                {/* Dropdown Menu */}
-                <div className={`absolute top-full left-0 mt-1 w-56 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-200 ${hoveredMenu === 'green-transition' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                <div className={`absolute top-full left-0 mt-1 w-56 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === 'green-transition' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
                   <Link to="/green-transition/where-we-are-now" className="block px-4 py-3 text-sm text-primary-foreground hover:text-accent hover:bg-primary-hover/50 transition-colors border-b border-primary-hover/30" onClick={() => setHoveredMenu(null)}>
                     Where We Are Now
                   </Link>
@@ -123,19 +134,8 @@ const Header = () => {
                   </Link>
                 </div>
               </div>
-              
-              <Link to="/books-academia" className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/books-academia') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
-                Books and Academia
-              </Link>
-              
-              <Link to="/english-ielts" className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${isActive('/english-ielts') ? 'text-primary-foreground bg-primary-hover rounded-md' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50 rounded-md'}`}>
-                English IELTS
-              </Link>
             </div>
           </div>
-
-          {/* Empty right section to maintain balance */}
-          <div className="w-48"></div>
         </nav>
       </div>
     </header>;
