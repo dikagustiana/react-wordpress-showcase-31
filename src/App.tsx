@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WarningBanner } from '@/components/WarningBanner';
+import { RoleProvider } from '@/contexts/RoleContext';
+import { EditModeProvider } from '@/contexts/EditModeContext';
 
 // Pages
 import Index from "./pages/Index";
@@ -89,12 +91,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <WarningBanner />
-        <Routes>
+    <RoleProvider>
+      <EditModeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <WarningBanner />
+            <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />
           <Route path="/critical-thinking-research/:phase" element={<EssayListTemplate />} />
@@ -177,9 +181,11 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
           
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </EditModeProvider>
+    </RoleProvider>
   </QueryClientProvider>
 );
 

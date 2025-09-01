@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useContent, FSLISection, FSLIMetric } from '@/hooks/useContent';
-import { useAuthRole } from '@/hooks/useAuthRole';
+import { useRole } from '@/contexts/RoleContext';
+import { useEditMode } from '@/contexts/EditModeContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Save, X } from 'lucide-react';
@@ -25,12 +26,11 @@ interface DynamicFSLITemplateProps {
 }
 
 export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }) => {
-  const { isAdmin } = useAuthRole();
+  const { role, isAdmin } = useRole();
+  const { editMode, setEditMode, editingSection, setEditingSection } = useEditMode();
   const { page, sections, metrics, embeds, loading, updatePage, updateSection, updateMetric } = useContent(slug);
   const { toast } = useToast();
   
-  const [editMode, setEditMode] = useState(false);
-  const [editingSection, setEditingSection] = useState<FSLISection | null>(null);
   const [editingMetric, setEditingMetric] = useState<FSLIMetric | null>(null);
   const [editingPageHeader, setEditingPageHeader] = useState(false);
   const [showRevisionHistory, setShowRevisionHistory] = useState(false);
@@ -39,6 +39,18 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
     subtitle: '',
     notes_ref: ''
   });
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('[DynamicFSLI] role=', role, 'isAdmin=', isAdmin, 'editMode=', editMode);
+  }, [role, isAdmin, editMode]);
+
+  React.useEffect(() => {
+    console.log('[DynamicFSLI] sections loaded:', sections.length);
+    sections.forEach(section => {
+      console.log('[SectionRender]', section.key, section.id);
+    });
+  }, [sections]);
 
   // Format numbers for display
   const formatValue = (value: number | undefined, unit: string | undefined) => {
@@ -123,27 +135,40 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
 
   // Handle section edit
   const handleSectionEdit = (key: string) => {
+    console.log('[EditorOpen] for section key:', key);
     const section = getSection(key);
     if (section) {
-      setEditingSection(section);
+      console.log('[EditorOpen] found section:', section.id);
+      setEditingSection(section.id);
     }
   };
 
   const handleSectionSave = async (content: string) => {
     if (editingSection && page) {
+      console.log('[Save] section', editingSection, 'len=', content.length);
       const formattedContent = JSON.stringify({
         type: 'html',
         content: content
       });
       
-      await createRevision(page.id, editingSection.id, { content });
-      updateSection(editingSection.id, formattedContent);
-      setEditingSection(null);
-      
-      toast({
-        title: "Content updated",
-        description: "Section saved successfully.",
-      });
+      try {
+        await createRevision(page.id, editingSection, { content });
+        updateSection(editingSection, formattedContent);
+        setEditingSection(null);
+        
+        toast({
+          title: "Content updated",
+          description: "Section saved successfully.",
+        });
+        console.log('[Save] success for section:', editingSection);
+      } catch (error) {
+        console.error('[SaveError]', error);
+        toast({
+          title: "Save failed",
+          description: "Failed to save section. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -153,7 +178,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
         type: 'html',
         content: content
       });
-      updateSection(editingSection.id, formattedContent);
+      updateSection(editingSection, formattedContent);
     }
   };
 
@@ -188,6 +213,11 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
         description: "Content has been reverted to the selected version.",
       });
     }
+  };
+
+  // Get the section being edited
+  const getCurrentEditingSection = () => {
+    return sections.find(s => s.id === editingSection);
   };
 
   // Handle save all
@@ -242,12 +272,21 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <EnhancedAdminToolbar 
-        editMode={editMode}
-        onToggleEditMode={() => setEditMode(!editMode)}
-        onOpenHistory={() => setShowRevisionHistory(true)}
-        onSaveAll={handleSaveAll}
-      />
+      
+      {/* Admin Toolbar - Fixed positioning */}
+      {isAdmin && (
+        <div className="fixed top-20 right-4 z-50">
+          <EnhancedAdminToolbar 
+            editMode={editMode}
+            onToggleEditMode={() => {
+              console.log('[AdminToolbar] Toggle edit mode from', editMode, 'to', !editMode);
+              setEditMode(!editMode);
+            }}
+            onOpenHistory={() => setShowRevisionHistory(true)}
+            onSaveAll={handleSaveAll}
+          />
+        </div>
+      )}
       
       <main className="flex-1 flex">
         <FSLISidebar />
@@ -310,12 +349,12 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Quick Facts</h2>
-                  {editMode && <EditButton onClick={() => handleSectionEdit('quick_facts')} />}
+                  {isAdmin && editMode && <EditButton onClick={() => handleSectionEdit('quick_facts')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
                     content={getSectionContent('quick_facts')}
-                    isEditing={editingSection?.key === 'quick_facts'}
+                    isEditing={editingSection === getSection('quick_facts')?.id}
                   />
                 </div>
               </section>
@@ -324,12 +363,12 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Definition</h2>
-                  {editMode && <EditButton onClick={() => handleSectionEdit('definition')} />}
+                  {isAdmin && editMode && <EditButton onClick={() => handleSectionEdit('definition')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
                     content={getSectionContent('definition')}
-                    isEditing={editingSection?.key === 'definition'}
+                    isEditing={editingSection === getSection('definition')?.id}
                   />
                 </div>
               </section>
@@ -338,12 +377,12 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Recognition</h2>
-                  {editMode && <EditButton onClick={() => handleSectionEdit('recognition')} />}
+                  {isAdmin && editMode && <EditButton onClick={() => handleSectionEdit('recognition')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
                     content={getSectionContent('recognition')}
-                    isEditing={editingSection?.key === 'recognition'}
+                    isEditing={editingSection === getSection('recognition')?.id}
                   />
                 </div>
               </section>
@@ -352,12 +391,12 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Measurement</h2>
-                  {editMode && <EditButton onClick={() => handleSectionEdit('measurement')} />}
+                  {isAdmin && editMode && <EditButton onClick={() => handleSectionEdit('measurement')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
                     content={getSectionContent('measurement')}
-                    isEditing={editingSection?.key === 'measurement'}
+                    isEditing={editingSection === getSection('measurement')?.id}
                   />
                 </div>
               </section>
@@ -366,12 +405,12 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <section className={`group ${editMode ? 'edit-mode' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-foreground">Disclosure</h2>
-                  {editMode && <EditButton onClick={() => handleSectionEdit('disclosure')} />}
+                  {isAdmin && editMode && <EditButton onClick={() => handleSectionEdit('disclosure')} />}
                 </div>
                 <div className="bg-card rounded-lg p-6 border">
                   <EssayAutoResize 
                     content={getSectionContent('disclosure')}
-                    isEditing={editingSection?.key === 'disclosure'}
+                    isEditing={editingSection === getSection('disclosure')?.id}
                   />
                 </div>
               </section>
@@ -394,11 +433,14 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
       {editingSection && (
         <MediumStyleEditor
           isOpen={true}
-          onClose={() => setEditingSection(null)}
-          content={getSectionContent(editingSection.key)}
+          onClose={() => {
+            console.log('[Editor] closing for section:', editingSection);
+            setEditingSection(null);
+          }}
+          content={getSectionContent(getCurrentEditingSection()?.key || '')}
           onSave={handleSectionSave}
           onAutoSave={handleSectionAutoSave}
-          title={`Edit ${editingSection.key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+          title={`Edit ${getCurrentEditingSection()?.key?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Section'}`}
         />
       )}
 
@@ -466,7 +508,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
         isOpen={showRevisionHistory}
         onClose={() => setShowRevisionHistory(false)}
         pageId={page.id}
-        sectionId={editingSection?.id}
+        sectionId={editingSection}
         onRevert={handleRevisionRevert}
       />
     </div>

@@ -18,16 +18,13 @@ export const useAuthRole = (): AuthRole => {
 
   // Debug logging on startup
   useEffect(() => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    const supabaseUrl = "https://jvetboekyihvcialyeai.supabase.co";
+    const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp2ZXRib2VreWlodmNpYWx5ZWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3Mzg3NTEsImV4cCI6MjA3MjMxNDc1MX0.SsxcBq7rfYRNXwHFzxPzXYPcokLdKEoarCsxWcdWSKc";
     
     console.log("Supabase URL:", supabaseUrl);
     console.log("Supabase Anon Key (first 12):", anonKey?.slice(0, 12));
-    
-    // Extract project ref from URL
-    const urlMatch = supabaseUrl?.match(/https:\/\/([^.]+)\.supabase\.co/);
-    const projectRef = urlMatch ? urlMatch[1] : 'unknown';
-    console.log("Supabase Project Ref:", projectRef);
+    console.log("Supabase Project Ref: jvetboekyihvcialyeai");
+    console.log('[Boot] Auth hook initialized');
   }, []);
 
   const fetchUserRole = async (userId: string, userEmail?: string) => {

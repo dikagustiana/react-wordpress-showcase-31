@@ -217,6 +217,10 @@
     overflow: hidden;
   }
 
+  /* Z-index utilities for admin interface */
+  .z-60 { z-index: 60; }
+  .z-70 { z-index: 70; }
+
   /* Prose styles for essay content */
   .prose {
     color: hsl(var(--foreground));
