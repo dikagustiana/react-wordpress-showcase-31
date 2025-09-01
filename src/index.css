@@ -196,17 +196,31 @@
     scroll-behavior: smooth;
   }
 
-  /* Edit Mode Styles */
-  .edit-mode .group:hover .opacity-0 {
-    @apply opacity-100;
+  /* Scoped Edit Mode Styles - Only active when edit mode is ON */
+  .admin-editing [data-editable] {
+    position: relative;
+    outline: 1px dashed hsl(var(--ring) / 0.6);
+    outline-offset: 6px;
+    transition: outline-color 0.15s, outline-offset 0.15s;
+  }
+  
+  .admin-editing [data-editable]:hover { 
+    outline-color: hsl(var(--ring)); 
+    outline-offset: 8px; 
   }
 
-  .edit-mode {
-    @apply ring-2 ring-primary/20 ring-offset-2 ring-offset-background transition-all duration-200;
+  /* Edit button overlay that doesn't shift layout */
+  [data-editable] .edit-handle {
+    position: absolute;
+    top: 8px; 
+    right: 10px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 2;
   }
-
-  .edit-mode:hover {
-    @apply ring-primary/40;
+  
+  .admin-editing [data-editable]:hover .edit-handle { 
+    opacity: 1; 
   }
 
   /* Essay Auto-resize Styles */

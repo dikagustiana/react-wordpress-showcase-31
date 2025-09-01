@@ -73,8 +73,8 @@ export const EssayAutoResize: React.FC<EssayAutoResizeProps> = ({
   if (isEmpty) {
     return (
       <div className={`relative ${className}`}>
-        <div className="text-muted-foreground italic p-6 text-center bg-muted/30 rounded-lg">
-          {isAdmin ? 'Edit to add content' : 'No content yet'}
+        <div className="prose">
+          <p className="italic text-muted-foreground">No content yet</p>
         </div>
         {children}
       </div>
