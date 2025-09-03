@@ -43,8 +43,33 @@ const Header = () => {
     { label: 'Home', path: '/' },
     { label: 'Finance Workspace', path: '/finance-workspace' },
     { label: 'Critical Thinking and Research', path: '/critical-thinking-research' },
+    { 
+      label: 'Accounting', 
+      path: '/accounting',
+      hasDropdown: true,
+      dropdownKey: 'accounting',
+      submenu: accountingSubmenu
+    },
+    { 
+      label: 'Finance', 
+      path: '/finance-101',
+      hasDropdown: true,
+      dropdownKey: 'finance101',
+      submenu: finance101Submenu
+    },
+    { 
+      label: 'The Green Transition', 
+      path: '/green-transition',
+      hasDropdown: true,
+      dropdownKey: 'green-transition',
+      submenu: [
+        { label: 'Where We Are Now', path: '/green-transition/where-we-are-now' },
+        { label: 'Challenges Ahead', path: '/green-transition/challenges-ahead' },
+        { label: 'Pathways Forward', path: '/green-transition/pathways-forward' }
+      ]
+    },
     { label: 'Books and Academia', path: '/books-academia' },
-    { label: 'English IELTS', path: '/english-ielts' }
+    { label: 'English – IELTS', path: '/english-ielts' }
   ];
 
   return <header className="sticky top-0 z-50 bg-primary shadow-lg">
@@ -86,68 +111,64 @@ const Header = () => {
           {/* Navigation Menu - Compact spacing */}
           <div className="flex-1 flex justify-center ml-8">
             <div className="flex items-center gap-5">
-              {/* Main navigation items */}
-              {mainNavItems.map((item) => (
-                <Link 
-                  key={item.path}
-                  to={item.path} 
-                  className={`px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${
-                    isActive(item.path) && (item.path === '/' ? location.pathname === '/' : true)
-                      ? 'text-primary-foreground bg-primary-hover' 
-                      : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-
-              {/* Accounting with Dropdown */}
-              <div className="relative" onMouseEnter={() => setHoveredMenu('accounting')} onMouseLeave={() => setHoveredMenu(null)}>
-                <Link to="/accounting" className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${isActive('/accounting') ? 'text-primary-foreground bg-primary-hover' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'}`}>
-                  Accounting
-                  <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === 'accounting' ? 'rotate-180' : ''}`} />
-                </Link>
-                
-                <div className={`absolute top-full left-0 mt-1 w-64 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === 'accounting' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                  {accountingSubmenu.map((item) => <Link key={item.path} to={item.path} className="block px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover transition-colors border-b border-primary-hover/30 last:border-b-0" onClick={() => setHoveredMenu(null)}>
+              {/* Unified navigation items */}
+              {mainNavItems.map((item) => {
+                if (item.hasDropdown) {
+                  // Render dropdown item
+                  return (
+                    <div 
+                      key={item.path}
+                      className="relative" 
+                      onMouseEnter={() => setHoveredMenu(item.dropdownKey)} 
+                      onMouseLeave={() => setHoveredMenu(null)}
+                    >
+                      <Link 
+                        to={item.path} 
+                        className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${
+                          isActive(item.path) 
+                            ? 'text-primary-foreground bg-primary-hover' 
+                            : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'
+                        }`}
+                      >
+                        {item.label}
+                        <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === item.dropdownKey ? 'rotate-180' : ''}`} />
+                      </Link>
+                      
+                      <div className={`absolute top-full left-0 mt-1 ${item.dropdownKey === 'finance101' ? 'w-72' : item.dropdownKey === 'accounting' ? 'w-64' : 'w-56'} bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === item.dropdownKey ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
+                        {item.submenu?.map((subItem) => (
+                          <Link 
+                            key={subItem.path} 
+                            to={subItem.path} 
+                            className={`block px-4 py-3 text-sm text-primary-foreground transition-colors border-b border-primary-hover/30 last:border-b-0 ${
+                              item.dropdownKey === 'green-transition' 
+                                ? 'hover:text-accent hover:bg-primary-hover/50' 
+                                : 'hover:bg-primary-hover'
+                            }`}
+                            onClick={() => setHoveredMenu(null)}
+                          >
+                            {subItem.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  // Render simple link item
+                  return (
+                    <Link 
+                      key={item.path}
+                      to={item.path} 
+                      className={`px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${
+                        isActive(item.path) && (item.path === '/' ? location.pathname === '/' : true)
+                          ? 'text-primary-foreground bg-primary-hover' 
+                          : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'
+                      }`}
+                    >
                       {item.label}
-                    </Link>)}
-                </div>
-              </div>
-
-              {/* Finance 101 with Dropdown */}
-              <div className="relative" onMouseEnter={() => setHoveredMenu('finance101')} onMouseLeave={() => setHoveredMenu(null)}>
-                <Link to="/finance-101" className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${isActive('/finance-101') ? 'text-primary-foreground bg-primary-hover' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'}`}>
-                  Finance 101
-                  <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === 'finance101' ? 'rotate-180' : ''}`} />
-                </Link>
-                
-                <div className={`absolute top-full left-0 mt-1 w-72 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === 'finance101' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                  {finance101Submenu.map((item) => <Link key={item.path} to={item.path} className="block px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover transition-colors border-b border-primary-hover/30 last:border-b-0" onClick={() => setHoveredMenu(null)}>
-                      {item.label}
-                    </Link>)}
-                </div>
-              </div>
-
-              {/* Green Transition with Dropdown */}
-              <div className="relative" onMouseEnter={() => setHoveredMenu('green-transition')} onMouseLeave={() => setHoveredMenu(null)}>
-                <Link to="/green-transition" className={`flex items-center px-3 py-2 text-sm font-medium transition-all duration-150 whitespace-nowrap rounded-md ${isActive('/green-transition') ? 'text-primary-foreground bg-primary-hover' : 'text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-hover/50'}`}>
-                  The Green Transition
-                  <ChevronDown className={`ml-1 w-3 h-3 transition-transform duration-150 ${hoveredMenu === 'green-transition' ? 'rotate-180' : ''}`} />
-                </Link>
-                
-                <div className={`absolute top-full left-0 mt-1 w-56 bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === 'green-transition' ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
-                  <Link to="/green-transition/where-we-are-now" className="block px-4 py-3 text-sm text-primary-foreground hover:text-accent hover:bg-primary-hover/50 transition-colors border-b border-primary-hover/30" onClick={() => setHoveredMenu(null)}>
-                    Where We Are Now
-                  </Link>
-                  <Link to="/green-transition/challenges-ahead" className="block px-4 py-3 text-sm text-primary-foreground hover:text-accent hover:bg-primary-hover/50 transition-colors border-b border-primary-hover/30" onClick={() => setHoveredMenu(null)}>
-                    Challenges Ahead
-                  </Link>
-                  <Link to="/green-transition/pathways-forward" className="block px-4 py-3 text-sm text-primary-foreground hover:text-accent hover:bg-primary-hover/50 transition-colors" onClick={() => setHoveredMenu(null)}>
-                    Pathways Forward
-                  </Link>
-                </div>
-              </div>
+                    </Link>
+                  );
+                }
+              })}
             </div>
           </div>
         </nav>
