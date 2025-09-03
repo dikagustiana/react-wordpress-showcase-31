@@ -10,6 +10,7 @@ interface AddEssayButtonProps {
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg';
+  onCreate?: (sectionName: string) => Promise<any>;
   onEssayCreated?: (essayId: string) => void;
 }
 
@@ -18,6 +19,7 @@ export const AddEssayButton: React.FC<AddEssayButtonProps> = ({
   className,
   variant = 'outline',
   size = 'default',
+  onCreate,
   onEssayCreated
 }) => {
   const { isAdmin } = useAuthRole();

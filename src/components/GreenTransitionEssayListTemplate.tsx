@@ -1,32 +1,45 @@
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
+import { ArrowLeft, TreePine, Plus, Clock, User, Calendar } from 'lucide-react';
 import { useState } from 'react';
+import { useAuthRole } from '@/hooks/useAuthRole';
+import { useGreenEssays } from '@/hooks/useGreenEssays';
+import { AddEssayButton } from '@/components/admin/AddEssayButton';
 import Header from './Header';
 import Footer from './Footer';
-import { getAllGreenTransitionEssaysForPhase, getGreenTransitionPhaseTitle } from '../lib/greenTransitionData';
+
+const sectionTitles: Record<string, string> = {
+  'where-we-are-now': 'Where We Are Now',
+  'challenges-ahead': 'Challenges Ahead',
+  'pathways-forward': 'Pathways Forward'
+};
+
+const sectionDescriptions: Record<string, string> = {
+  'where-we-are-now': 'Summarize the current state: energy mix, emissions, active policies, and key barriers.',
+  'challenges-ahead': 'Identify gaps in policy, funding, technology, infrastructure, and market readiness.',
+  'pathways-forward': 'Roadmap for implementation: sector priorities, sequence of initiatives, funding, and metrics.'
+};
 
 const GreenTransitionEssayListTemplate = () => {
   const { phase } = useParams<{ phase: string }>();
-  const [sortBy, setSortBy] = useState<'latest' | 'popular'>('latest');
-  const [currentPage, setCurrentPage] = useState(1);
-  const essaysPerPage = 6;
+  const { isAdmin } = useAuthRole();
+  const { essays, loading, createEssay } = useGreenEssays(phase);
   
-  const essays = getAllGreenTransitionEssaysForPhase(phase || '');
-  const phaseTitle = getGreenTransitionPhaseTitle(phase || '');
+  const sectionTitle = sectionTitles[phase || ''] || 'Essays';
+  const sectionDescription = sectionDescriptions[phase || ''] || 'Explore essays in this section.';
 
-  // Sort essays based on selection
-  const sortedEssays = [...essays].sort((a, b) => {
-    if (sortBy === 'latest') {
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    }
-    // For popular, we'll just return as-is for now (could implement view counts later)
-    return 0;
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(sortedEssays.length / essaysPerPage);
-  const startIndex = (currentPage - 1) * essaysPerPage;
-  const currentEssays = sortedEssays.slice(startIndex, startIndex + essaysPerPage);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
+        <Header />
+        <main className="max-w-6xl mx-auto px-6 py-8">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading essays...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!phase) {
     return (
@@ -34,10 +47,10 @@ const GreenTransitionEssayListTemplate = () => {
         <Header />
         <main className="max-w-6xl mx-auto px-6 py-8">
           <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-primary mb-4">Phase Not Found</h1>
+            <h1 className="text-2xl font-bold text-primary mb-4">Section Not Found</h1>
             <Link 
               to="/green-transition"
-              className="text-card-cta hover:text-card-cta/80 font-medium"
+              className="text-primary hover:text-primary/80 font-medium"
             >
               ← Back to The Green Transition
             </Link>
@@ -64,87 +77,94 @@ const GreenTransitionEssayListTemplate = () => {
 
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-4 font-plus-jakarta">
-            {phaseTitle} Essays
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            Explore in-depth analysis and insights about {phaseTitle.toLowerCase()} in the context of global green transition.
-          </p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-primary mb-4 font-plus-jakarta">
+                {sectionTitle} Essays
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-3xl">
+                {sectionDescription}
+              </p>
+            </div>
+            
+            {/* Add Essay Button (Admin Only) */}
+            {isAdmin && (
+              <AddEssayButton 
+                section={phase}
+                onCreate={createEssay}
+              />
+            )}
+          </div>
         </div>
 
         {/* Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div className="flex items-center space-x-4">
-            <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
-            <select 
-              value={sortBy} 
-              onChange={(e) => setSortBy(e.target.value as 'latest' | 'popular')}
-              className="px-3 py-1 border border-input rounded-lg text-sm bg-background"
-            >
-              <option value="latest">Latest</option>
-              <option value="popular">Popular</option>
-            </select>
-          </div>
           <div className="text-sm text-muted-foreground">
             {essays.length} essays found
           </div>
         </div>
 
         {/* Essays Grid */}
-        {currentEssays.length > 0 ? (
+        {essays.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {currentEssays.map((essay) => (
+            {essays.map((essay) => (
               <Link
                 key={essay.id}
-                to={`/green-transition/${phase}/${essay.id}`}
-                className="group block bg-card-bg-light rounded-[var(--card-radius)] shadow-[var(--card-shadow)] hover:shadow-[var(--card-shadow-hover)] transition-all duration-300 overflow-hidden"
+                to={`/green-transition/${phase}/${essay.slug}`}
+                className="group block bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
               >
-                {/* Thumbnail */}
-                <div className="w-full h-48 bg-gray-200 overflow-hidden">
-                  <img 
-                    src={essay.thumbnail} 
-                    alt={essay.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
+                {/* Cover Image */}
+                {essay.cover_image_url && (
+                  <div className="w-full h-48 bg-gray-200 overflow-hidden">
+                    <img 
+                      src={essay.cover_image_url} 
+                      alt={essay.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                )}
                 
                 {/* Content */}
                 <div className="p-6">
-                  {/* Category Badge */}
-                  <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-card-icon-bg text-card-title mb-3">
-                    {phaseTitle}
-                  </div>
+                  {/* Status Badge */}
+                  {essay.status === 'draft' && (
+                    <div className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mb-3">
+                      Draft
+                    </div>
+                  )}
                   
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-card-title mb-3 line-clamp-2 group-hover:text-card-cta transition-colors">
+                  <h3 className="text-xl font-bold text-card-title mb-3 line-clamp-2 group-hover:text-primary transition-colors">
                     {essay.title}
                   </h3>
                   
-                  {/* Snippet */}
-                  <p className="text-card-description text-sm leading-relaxed mb-4 line-clamp-3">
-                    {essay.snippet}
-                  </p>
+                  {/* Subtitle/Snippet */}
+                  {essay.subtitle && (
+                    <p className="text-card-description text-sm leading-relaxed mb-4 line-clamp-3">
+                      {essay.subtitle}
+                    </p>
+                  )}
                   
                   {/* Meta Information */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center space-x-4">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
+                    <div className="flex items-center space-x-3">
                       <div className="flex items-center">
                         <User className="w-3 h-3 mr-1" />
-                        <span>{essay.author}</span>
+                        <span>{essay.author_name}</span>
                       </div>
                       <div className="flex items-center">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        <span>{essay.date}</span>
+                        <Clock className="w-3 h-3 mr-1" />
+                        <span>{essay.reading_time} min read</span>
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <Clock className="w-3 h-3 mr-1" />
-                      <span>{essay.readTime}</span>
+                      <Calendar className="w-3 h-3 mr-1" />
+                      <span>{new Date(essay.updated_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                   
                   {/* Read Button */}
-                  <div className="mt-4 flex items-center text-card-cta font-semibold text-sm">
+                  <div className="flex items-center text-primary font-semibold text-sm">
                     Read Essay
                     <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
                   </div>
@@ -154,46 +174,18 @@ const GreenTransitionEssayListTemplate = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No essays found for this phase yet.</p>
+            <TreePine className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-4">
+              No essays found for this section yet.
+            </p>
+            {isAdmin && (
+              <p className="text-sm text-muted-foreground">
+                Click the "Add Essay" button above to create the first essay.
+              </p>
+            )}
           </div>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-2 text-sm border border-input rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent"
-            >
-              Previous
-            </button>
-            
-            <div className="flex space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-2 text-sm rounded-lg ${
-                    currentPage === page
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-input hover:bg-accent'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-            
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-2 text-sm border border-input rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent"
-            >
-              Next
-            </button>
-          </div>
-        )}
       </main>
       
       <Footer />
