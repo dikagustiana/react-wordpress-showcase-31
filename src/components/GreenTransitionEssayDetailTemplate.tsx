@@ -84,7 +84,7 @@ const GreenTransitionEssayDetailTemplate = () => {
 
         {/* Article with Inline Editor */}
         <article className="bg-card rounded-lg shadow-sm overflow-hidden">
-          {isAdmin ? (
+          {isAdmin && essay && !essay.id.startsWith('dummy-') ? (
             <div className="p-8">
               <GreenTransitionInlineEditor
                 essay={essay}
@@ -108,6 +108,27 @@ const GreenTransitionEssayDetailTemplate = () => {
               )}
               
               <div className="p-8">
+                {/* Dummy Content Banner */}
+                {essay.id.startsWith('dummy-') && (
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-blue-800">
+                          Konten Demo
+                        </h3>
+                        <div className="mt-2 text-sm text-blue-700">
+                          <p>Ini adalah konten dummy untuk demonstrasi. Konten ini akan digantikan dengan essay sesungguhnya ketika admin mulai membuat dan menerbitkan essay melalui sistem inline editor.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Header */}
                 <div className="mb-8">
                   {/* Category Badge */}
@@ -155,10 +176,38 @@ const GreenTransitionEssayDetailTemplate = () => {
                 </div>
 
                 {/* Content */}
-                <div 
-                  className="prose prose-lg max-w-none"
-                  dangerouslySetInnerHTML={{ __html: essay.content_html || '' }}
-                />
+                <div className="prose prose-lg max-w-none">
+                  {essay.id.startsWith('dummy-') ? (
+                    <div className="text-lg leading-relaxed text-gray-700 space-y-4">
+                      <p>
+                        Transisi energi global sedang menghadapi tantangan kompleks yang memerlukan pendekatan holistik dan realistis. 
+                        Essay ini mengeksplorasi berbagai dimensi dari perjalanan menuju energi berkelanjutan.
+                      </p>
+                      
+                      <p>
+                        Dalam konteks Indonesia, kebijakan energi harus mempertimbangkan realitas geografi, ekonomi, dan politik yang unik. 
+                        Populisme dalam politik energi seringkali bertentangan dengan kebutuhan teknis dan ekonomis transisi yang sesungguhnya.
+                      </p>
+                      
+                      <p>
+                        Analisis mendalam menunjukkan bahwa kesuksesan transisi energi bergantung pada keseimbangan antara ambisi klimat, 
+                        keamanan energi, dan keadilan sosial. Ketiga pilar ini harus diintegrasikan dalam setiap kebijakan energi yang berkelanjutan.
+                      </p>
+                      
+                      <blockquote className="border-l-4 border-primary pl-4 italic text-lg">
+                        "Transisi energi bukan hanya soal teknologi, tetapi juga tentang transformasi sosial, ekonomi, dan politik yang menyeluruh."
+                      </blockquote>
+                      
+                      <p>
+                        Ke depan, Indonesia perlu mengembangkan roadmap yang realistis namun ambisius, dengan mempertimbangkan kapasitas lokal, 
+                        potensi sumber daya, dan kebutuhan masyarakat. Kolaborasi antara pemerintah, sektor swasta, dan civil society 
+                        menjadi kunci untuk mewujudkan transisi energi yang adil dan berkelanjutan.
+                      </p>
+                    </div>
+                  ) : (
+                    <div dangerouslySetInnerHTML={{ __html: essay.content_html || '' }} />
+                  )}
+                </div>
 
                 {/* Tags */}
                 <div className="mt-8 pt-6 border-t border-gray-200">

@@ -99,6 +99,16 @@ const GreenTransitionEssayListTemplate = () => {
 
         {/* Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div className="flex items-center space-x-4">
+            <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+            <select 
+              value="latest"
+              className="px-3 py-1 border border-input rounded-lg text-sm bg-background"
+            >
+              <option value="latest">Latest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </div>
           <div className="text-sm text-muted-foreground">
             {essays.length} essays found
           </div>

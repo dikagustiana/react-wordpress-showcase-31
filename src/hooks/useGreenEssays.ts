@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthRole } from '@/hooks/useAuthRole';
 import { useToast } from '@/hooks/use-toast';
+import { dummyGreenEssays } from '@/data/dummyGreenEssays';
 
 export interface GreenEssay {
   id: string;
@@ -58,7 +59,35 @@ export const useGreenEssays = (section?: string) => {
       const { data, error } = await query;
       
       if (error) throw error;
-      setEssays((data || []) as GreenEssay[]);
+      
+      const realEssays = (data || []) as GreenEssay[];
+      
+      // If no real essays exist for this section, use dummy data
+      if (realEssays.length === 0 && section && dummyGreenEssays[section]) {
+        const dummyData = dummyGreenEssays[section].map(dummy => ({
+          ...dummy,
+          // Ensure all required fields are present
+          id: dummy.id!,
+          slug: dummy.slug!,
+          section: dummy.section!,
+          title: dummy.title!,
+          author_name: dummy.author_name!,
+          status: dummy.status!,
+          version: 1,
+          reading_time: dummy.reading_time!,
+          created_at: dummy.created_at!,
+          updated_at: dummy.updated_at!,
+          subtitle: dummy.subtitle,
+          cover_image_url: dummy.cover_image_url,
+          content_html: dummy.content_html,
+          content_json: null,
+          updated_by: null
+        })) as GreenEssay[];
+        
+        setEssays(dummyData);
+      } else {
+        setEssays(realEssays);
+      }
     } catch (error) {
       console.error('Error fetching essays:', error);
       toast({
