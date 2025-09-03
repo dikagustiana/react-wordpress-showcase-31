@@ -206,6 +206,166 @@ export type Database = {
           },
         ]
       }
+      green_essays: {
+        Row: {
+          author_name: string
+          content_html: string | null
+          content_json: Json | null
+          cover_image_url: string | null
+          created_at: string
+          id: string
+          reading_time: number | null
+          section: string
+          slug: string
+          status: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          author_name?: string
+          content_html?: string | null
+          content_json?: Json | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          reading_time?: number | null
+          section: string
+          slug: string
+          status?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          author_name?: string
+          content_html?: string | null
+          content_json?: Json | null
+          cover_image_url?: string | null
+          created_at?: string
+          id?: string
+          reading_time?: number | null
+          section?: string
+          slug?: string
+          status?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      green_essays_templates: {
+        Row: {
+          content_html: string | null
+          content_json: Json | null
+          created_at: string
+          id: string
+          section: string
+          title_template: string
+        }
+        Insert: {
+          content_html?: string | null
+          content_json?: Json | null
+          created_at?: string
+          id?: string
+          section: string
+          title_template?: string
+        }
+        Update: {
+          content_html?: string | null
+          content_json?: Json | null
+          created_at?: string
+          id?: string
+          section?: string
+          title_template?: string
+        }
+        Relationships: []
+      }
+      green_essays_versions: {
+        Row: {
+          content_html: string | null
+          content_json: Json | null
+          created_at: string
+          created_by: string | null
+          essay_id: string
+          id: string
+          subtitle: string | null
+          title: string
+          version: number
+          version_note: string | null
+        }
+        Insert: {
+          content_html?: string | null
+          content_json?: Json | null
+          created_at?: string
+          created_by?: string | null
+          essay_id: string
+          id?: string
+          subtitle?: string | null
+          title: string
+          version: number
+          version_note?: string | null
+        }
+        Update: {
+          content_html?: string | null
+          content_json?: Json | null
+          created_at?: string
+          created_by?: string | null
+          essay_id?: string
+          id?: string
+          subtitle?: string | null
+          title?: string
+          version?: number
+          version_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "green_essays_versions_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "green_essays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ops_edit_log: {
+        Row: {
+          action: string
+          essay_id: string
+          id: string
+          timestamp: string
+          user_email: string
+        }
+        Insert: {
+          action: string
+          essay_id: string
+          id?: string
+          timestamp?: string
+          user_email: string
+        }
+        Update: {
+          action?: string
+          essay_id?: string
+          id?: string
+          timestamp?: string
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ops_edit_log_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "green_essays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -265,6 +425,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_reading_time: {
+        Args: { content_text: string }
+        Returns: number
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
