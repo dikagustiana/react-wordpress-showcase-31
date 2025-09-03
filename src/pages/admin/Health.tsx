@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { checkSupabaseEnv, logDiagnostic } from '@/utils/diagnostics';
+import { SystemTestButton } from '@/components/admin/SystemTestButton';
 
 interface HealthCheck {
   name: string;
@@ -296,6 +297,14 @@ const Health: React.FC = () => {
           <p className="text-muted-foreground">Running health checks...</p>
         </div>
       )}
+
+      <div className="mt-8 pt-8 border-t">
+        <h2 className="text-xl font-semibold mb-4">Quick System Test</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Run a quick end-to-end test to verify essay creation workflow
+        </p>
+        <SystemTestButton />
+      </div>
     </div>
   );
 };

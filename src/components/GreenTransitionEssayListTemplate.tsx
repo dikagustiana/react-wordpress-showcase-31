@@ -22,7 +22,14 @@ const sectionDescriptions: Record<string, string> = {
 const GreenTransitionEssayListTemplate = () => {
   const { phase } = useParams<{ phase: string }>();
   const { isAdmin } = useAuthRole();
-  const { essays, loading, createEssay } = useGreenEssays(phase);
+  const { essays, loading, refreshEssays } = useGreenEssays(phase);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleEssayCreated = async (essayId: string, slug: string, path: string) => {
+    // Refresh the essay list to show the new essay
+    await refreshEssays();
+    setRefreshTrigger(prev => prev + 1);
+  };
   
   const sectionTitle = sectionTitles[phase || ''] || 'Essays';
   const sectionDescription = sectionDescriptions[phase || ''] || 'Explore essays in this section.';
@@ -91,7 +98,7 @@ const GreenTransitionEssayListTemplate = () => {
             {isAdmin && (
               <AddEssayButton 
                 section={phase}
-                onCreate={createEssay}
+                onEssayCreated={handleEssayCreated}
               />
             )}
           </div>
