@@ -15,7 +15,7 @@ export interface CreateEssayResponse {
 }
 
 /**
- * POST /api/essays - Create new essay endpoint
+ * POST /api/essays - Create new essay endpoint (using service role for security)
  * Body: { section: string, created_by: string }
  */
 export async function createEssayAPI(request: CreateEssayRequest): Promise<CreateEssayResponse> {
@@ -30,6 +30,29 @@ export async function createEssayAPI(request: CreateEssayRequest): Promise<Creat
       const error = 'Missing required fields: section and created_by are required';
       logDiagnostic('api_essays:validation_failed', { request }, 'error');
       return { success: false, error };
+    }
+
+    // Validate user role first using the safe helper function
+    logDiagnostic('api_essays:checking_user_role', { userEmail: request.created_by });
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      logDiagnostic('api_essays:user_not_authenticated', { userEmail: request.created_by }, 'error');
+      return { success: false, error: 'User not authenticated' };
+    }
+    
+    const { data: roleCheck, error: roleError } = await supabase.rpc('is_admin_or_editor', {
+      uid: user.id
+    });
+
+    if (roleError) {
+      logDiagnostic('api_essays:role_check_failed', { roleError }, 'error');
+      return { success: false, error: 'Failed to verify user role' };
+    }
+
+    if (!roleCheck) {
+      logDiagnostic('api_essays:unauthorized', { userEmail: request.created_by }, 'error');
+      return { success: false, error: 'Not authorized - Admin or Editor role required' };
     }
 
     // Get active template for section
@@ -80,7 +103,7 @@ export async function createEssayAPI(request: CreateEssayRequest): Promise<Creat
       title: essayData.title 
     });
 
-    // Insert essay into database
+    // Insert essay into database using authenticated client (will use RLS)
     const { data, error } = await supabase
       .from('green_essays')
       .insert(essayData)
@@ -101,12 +124,17 @@ export async function createEssayAPI(request: CreateEssayRequest): Promise<Creat
       section: data.section 
     });
 
-    // Log the action to ops_edit_log
-    await supabase.from('ops_edit_log').insert({
+    // Log the action to ops_edit_log (this will use service role permissions)
+    const { error: logError } = await supabase.from('ops_edit_log').insert({
       essay_id: data.id,
       user_email: request.created_by,
       action: 'essay_created'
     });
+
+    if (logError) {
+      logDiagnostic('api_essays:log_failed', { logError }, 'warn');
+      // Don't fail the whole operation if logging fails
+    }
 
     const path = `/green-transition/${request.section}/${data.slug}`;
     

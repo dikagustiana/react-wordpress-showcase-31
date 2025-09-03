@@ -79,7 +79,36 @@ export const SystemTestButton: React.FC = () => {
     }
     setResults([...testResults]);
 
-    // Test 3: Essay Creation API
+    // Test 3: Role Function Test
+    testResults.push({ name: 'Role Function Test', status: 'pending', message: 'Testing...' });
+    setResults([...testResults]);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error('User not authenticated');
+      
+      const { data: isAdminEditor, error: roleError } = await supabase.rpc('is_admin_or_editor', {
+        uid: user.id
+      });
+
+      if (roleError) throw roleError;
+      
+      testResults[2] = { 
+        name: 'Role Function Test', 
+        status: 'success', 
+        message: `Role function working. User is ${isAdminEditor ? 'Admin/Editor' : 'Viewer'}` 
+      };
+    } catch (error) {
+      testResults[2] = { 
+        name: 'Role Function Test', 
+        status: 'error', 
+        message: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      };
+    }
+    setResults([...testResults]);
+
+    // Test 4: Essay Creation API
     testResults.push({ name: 'Essay Creation API', status: 'pending', message: 'Testing...' });
     setResults([...testResults]);
 
@@ -90,7 +119,7 @@ export const SystemTestButton: React.FC = () => {
       });
 
       if (response.success && response.id) {
-        testResults[2] = { 
+        testResults[3] = { 
           name: 'Essay Creation API', 
           status: 'success', 
           message: `Essay created: ${response.slug}` 
@@ -99,14 +128,14 @@ export const SystemTestButton: React.FC = () => {
         // Clean up test essay
         await supabase.from('green_essays').delete().eq('id', response.id);
       } else {
-        testResults[2] = { 
+        testResults[3] = { 
           name: 'Essay Creation API', 
           status: 'error', 
           message: response.error || 'Unknown error' 
         };
       }
     } catch (error) {
-      testResults[2] = { 
+      testResults[3] = { 
         name: 'Essay Creation API', 
         status: 'error', 
         message: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
@@ -114,7 +143,7 @@ export const SystemTestButton: React.FC = () => {
     }
     setResults([...testResults]);
 
-    // Test 4: Storage Access
+    // Test 5: Storage Access
     testResults.push({ name: 'Storage Access', status: 'pending', message: 'Testing...' });
     setResults([...testResults]);
 
@@ -128,20 +157,20 @@ export const SystemTestButton: React.FC = () => {
       );
       
       if (hasRequired) {
-        testResults[3] = { 
+        testResults[4] = { 
           name: 'Storage Access', 
           status: 'success', 
           message: `All buckets available: ${bucketNames.join(', ')}` 
         };
       } else {
-        testResults[3] = { 
+        testResults[4] = { 
           name: 'Storage Access', 
           status: 'error', 
           message: `Missing required buckets` 
         };
       }
     } catch (error) {
-      testResults[3] = { 
+      testResults[4] = { 
         name: 'Storage Access', 
         status: 'error', 
         message: `Failed: ${error instanceof Error ? error.message : 'Unknown error'}` 

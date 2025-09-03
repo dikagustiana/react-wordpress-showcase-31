@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import { checkSupabaseEnv, logDiagnostic } from '@/utils/diagnostics';
 import { SystemTestButton } from '@/components/admin/SystemTestButton';
+import EndToEndTest from '@/components/EndToEndTest';
 
 interface HealthCheck {
   name: string;
@@ -161,25 +162,39 @@ const Health: React.FC = () => {
       });
     }
 
-    // Check 6: User Authentication
+    // Check 6: User Authentication & Role
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        results.push({
-          name: 'User Authentication',
-          status: 'success',
-          message: `Authenticated as: ${user.email} (Role: ${isAdmin ? 'Admin' : 'User'})`,
-          details: { 
-            userId: user.id, 
-            email: user.email, 
-            role: isAdmin ? 'admin' : 'user',
-            metadata: user.app_metadata 
-          }
+        // Test the new is_admin_or_editor function
+        const { data: isAdminEditor, error: roleError } = await supabase.rpc('is_admin_or_editor', {
+          uid: user.id
         });
+
+        if (roleError) {
+          results.push({
+            name: 'User Authentication & Role',
+            status: 'error',
+            message: `Role check failed: ${roleError.message}`,
+            details: { userId: user.id, error: roleError }
+          });
+        } else {
+          results.push({
+            name: 'User Authentication & Role',
+            status: 'success',
+            message: `Authenticated as: ${user.email} (Admin/Editor: ${isAdminEditor ? 'Yes' : 'No'})`,
+            details: { 
+              userId: user.id, 
+              email: user.email, 
+              isAdminEditor,
+              metadata: user.app_metadata 
+            }
+          });
+        }
       } else {
         results.push({
-          name: 'User Authentication',
+          name: 'User Authentication & Role',
           status: 'warning',
           message: 'Not authenticated - some features may not work',
           details: { authenticated: false }
@@ -187,7 +202,7 @@ const Health: React.FC = () => {
       }
     } catch (error) {
       results.push({
-        name: 'User Authentication',
+        name: 'User Authentication & Role',
         status: 'error',
         message: `Auth check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         details: error
@@ -304,6 +319,11 @@ const Health: React.FC = () => {
           Run a quick end-to-end test to verify essay creation workflow
         </p>
         <SystemTestButton />
+      </div>
+
+      <div className="mt-8 pt-8 border-t">
+        <h2 className="text-xl font-semibold mb-4">Comprehensive End-to-End Test</h2>
+        <EndToEndTest />
       </div>
     </div>
   );
