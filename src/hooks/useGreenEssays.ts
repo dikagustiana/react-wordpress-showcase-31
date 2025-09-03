@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthRole } from '@/hooks/useAuthRole';
 import { useToast } from '@/hooks/use-toast';
 import { dummyGreenEssays } from '@/data/dummyGreenEssays';
+import { handleSupabaseError, logDiagnostic, showSuccess, showError } from '@/utils/diagnostics';
 
 export interface GreenEssay {
   id: string;
@@ -43,6 +44,8 @@ export const useGreenEssays = (section?: string) => {
   const { toast } = useToast();
 
   const fetchEssays = async () => {
+    logDiagnostic('fetchEssays:start', { section, isAdmin });
+    
     try {
       setLoading(true);
       let query = supabase.from('green_essays').select('*').order('updated_at', { ascending: false });
@@ -58,9 +61,17 @@ export const useGreenEssays = (section?: string) => {
 
       const { data, error } = await query;
       
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, 'Fetch Essays', { section, isAdmin });
+        throw error;
+      }
       
       const realEssays = (data || []) as GreenEssay[];
+      logDiagnostic('fetchEssays:database_result', { 
+        realEssaysCount: realEssays.length,
+        section,
+        isAdmin 
+      });
       
       // If no real essays exist for this section, use dummy data
       if (realEssays.length === 0 && section && dummyGreenEssays[section]) {
@@ -84,34 +95,49 @@ export const useGreenEssays = (section?: string) => {
           updated_by: null
         })) as GreenEssay[];
         
+        logDiagnostic('fetchEssays:using_dummy_data', { 
+          dummyCount: dummyData.length,
+          section 
+        });
         setEssays(dummyData);
       } else {
+        logDiagnostic('fetchEssays:using_real_data', { 
+          realEssaysCount: realEssays.length,
+          section 
+        });
         setEssays(realEssays);
       }
     } catch (error) {
-      console.error('Error fetching essays:', error);
-      toast({
-        title: "Error loading essays",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
+      logDiagnostic('fetchEssays:error', { error, section, isAdmin }, 'error');
+      // Error already handled by handleSupabaseError above
     } finally {
       setLoading(false);
+      logDiagnostic('fetchEssays:complete', { section });
     }
   };
 
   const createEssay = async (sectionName: string) => {
     if (!isAdmin || !user) return null;
 
+    logDiagnostic('createEssay:start', { sectionName, userEmail: user.email });
+
     try {
       setSaving(true);
       
       // Get template for section
-      const { data: template } = await supabase
+      logDiagnostic('createEssay:fetching_template', { sectionName });
+      const { data: template, error: templateError } = await supabase
         .from('green_essays_templates')
         .select('*')
         .eq('section', sectionName)
         .single();
+
+      if (templateError) {
+        logDiagnostic('createEssay:template_fetch_failed', { 
+          templateError,
+          sectionName 
+        }, 'warn');
+      }
 
       // Generate unique slug
       const timestamp = Date.now();
@@ -128,13 +154,20 @@ export const useGreenEssays = (section?: string) => {
         status: 'draft' as const
       };
 
+      logDiagnostic('createEssay:inserting_essay', { essayData });
+
       const { data, error } = await supabase
         .from('green_essays')
         .insert(essayData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, 'Create Essay', { sectionName, essayData });
+        throw error;
+      }
+
+      logDiagnostic('createEssay:essay_created', { essayId: data.id, slug: data.slug });
 
       // Log the action
       await supabase.from('ops_edit_log').insert({
@@ -143,20 +176,14 @@ export const useGreenEssays = (section?: string) => {
         action: 'essay_created'
       });
 
-      toast({
-        title: "Essay created",
-        description: "New essay created successfully. You can now edit it inline."
-      });
+      showSuccess("Essay created", "New essay created successfully. You can now edit it inline.");
 
       await fetchEssays();
+      logDiagnostic('createEssay:complete', { essayId: data.id });
       return data;
     } catch (error) {
-      console.error('Error creating essay:', error);
-      toast({
-        title: "Failed to create essay",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
+      logDiagnostic('createEssay:error', { error, sectionName }, 'error');
+      // Error already handled by handleSupabaseError above
       return null;
     } finally {
       setSaving(false);
@@ -166,6 +193,13 @@ export const useGreenEssays = (section?: string) => {
   const updateEssay = async (id: string, updates: Partial<GreenEssay>) => {
     if (!isAdmin || !user) return false;
 
+    logDiagnostic('updateEssay:start', { 
+      essayId: id, 
+      updateFields: Object.keys(updates),
+      userEmail: user.email,
+      contentLength: updates.content_html?.length || 0
+    });
+
     try {
       setSaving(true);
 
@@ -174,6 +208,12 @@ export const useGreenEssays = (section?: string) => {
         const textContent = updates.content_html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         const wordCount = textContent.split(' ').length;
         updates.reading_time = Math.max(1, Math.ceil(wordCount / 200));
+        
+        logDiagnostic('updateEssay:reading_time_calculated', { 
+          essayId: id,
+          wordCount, 
+          readingTime: updates.reading_time 
+        });
       }
 
       const { data, error } = await supabase
@@ -183,10 +223,19 @@ export const useGreenEssays = (section?: string) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, 'Update Essay', { essayId: id, updates });
+        throw error;
+      }
+
+      logDiagnostic('updateEssay:essay_updated', { 
+        essayId: id,
+        newVersion: data.version,
+        title: data.title
+      });
 
       // Create version snapshot
-      await supabase.from('green_essays_versions').insert({
+      const { error: versionError } = await supabase.from('green_essays_versions').insert({
         essay_id: id,
         version: data.version,
         title: data.title,
@@ -196,6 +245,13 @@ export const useGreenEssays = (section?: string) => {
         created_by: user.email
       });
 
+      if (versionError) {
+        logDiagnostic('updateEssay:version_snapshot_failed', { 
+          versionError,
+          essayId: id 
+        }, 'warn');
+      }
+
       // Log the action
       await supabase.from('ops_edit_log').insert({
         essay_id: id,
@@ -203,22 +259,18 @@ export const useGreenEssays = (section?: string) => {
         action: 'essay_updated'
       });
 
-      console.log('[Green Essays] Essay saved:', id, 'Content length:', updates.content_html?.length || 0);
-      
-      toast({
-        title: "Essay saved",
-        description: "Your changes have been saved successfully."
+      logDiagnostic('updateEssay:complete', { 
+        essayId: id,
+        contentLength: updates.content_html?.length || 0
       });
+      
+      showSuccess("Essay saved", "Your changes have been saved successfully.");
 
       await fetchEssays();
       return true;
     } catch (error) {
-      console.error('Error updating essay:', error);
-      toast({
-        title: "Failed to save essay",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
+      logDiagnostic('updateEssay:error', { error, essayId: id }, 'error');
+      // Error already handled by handleSupabaseError above
       return false;
     } finally {
       setSaving(false);
@@ -228,6 +280,8 @@ export const useGreenEssays = (section?: string) => {
   const publishEssay = async (id: string) => {
     if (!isAdmin) return false;
 
+    logDiagnostic('publishEssay:start', { essayId: id, userEmail: user?.email });
+
     try {
       const { data, error } = await supabase
         .from('green_essays')
@@ -236,7 +290,16 @@ export const useGreenEssays = (section?: string) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, 'Publish Essay', { essayId: id });
+        throw error;
+      }
+
+      logDiagnostic('publishEssay:essay_published', { 
+        essayId: id,
+        title: data.title,
+        status: data.status
+      });
 
       // Log the action
       await supabase.from('ops_edit_log').insert({
@@ -245,20 +308,14 @@ export const useGreenEssays = (section?: string) => {
         action: 'essay_published'
       });
 
-      toast({
-        title: "Essay published",
-        description: "Essay is now live and visible to all users."
-      });
+      showSuccess("Essay published", "Essay is now live and visible to all users.");
 
       await fetchEssays();
+      logDiagnostic('publishEssay:complete', { essayId: id });
       return true;
     } catch (error) {
-      console.error('Error publishing essay:', error);
-      toast({
-        title: "Failed to publish essay",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
+      logDiagnostic('publishEssay:error', { error, essayId: id }, 'error');
+      // Error already handled by handleSupabaseError above
       return false;
     }
   };
@@ -266,13 +323,20 @@ export const useGreenEssays = (section?: string) => {
   const unpublishEssay = async (id: string) => {
     if (!isAdmin) return false;
 
+    logDiagnostic('unpublishEssay:start', { essayId: id, userEmail: user?.email });
+
     try {
       const { error } = await supabase
         .from('green_essays')
         .update({ status: 'draft' })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, 'Unpublish Essay', { essayId: id });
+        throw error;
+      }
+
+      logDiagnostic('unpublishEssay:essay_unpublished', { essayId: id });
 
       // Log the action
       await supabase.from('ops_edit_log').insert({
@@ -281,25 +345,21 @@ export const useGreenEssays = (section?: string) => {
         action: 'essay_unpublished'
       });
 
-      toast({
-        title: "Essay unpublished",
-        description: "Essay is now in draft mode."
-      });
+      showSuccess("Essay unpublished", "Essay is now in draft mode.");
 
       await fetchEssays();
+      logDiagnostic('unpublishEssay:complete', { essayId: id });
       return true;
     } catch (error) {
-      console.error('Error unpublishing essay:', error);
-      toast({
-        title: "Failed to unpublish essay",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
-        variant: "destructive"
-      });
+      logDiagnostic('unpublishEssay:error', { error, essayId: id }, 'error');
+      // Error already handled by handleSupabaseError above
       return false;
     }
   };
 
   const getEssayVersions = async (essayId: string): Promise<EssayVersion[]> => {
+    logDiagnostic('getEssayVersions:start', { essayId });
+    
     try {
       const { data, error } = await supabase
         .from('green_essays_versions')
@@ -307,10 +367,19 @@ export const useGreenEssays = (section?: string) => {
         .eq('essay_id', essayId)
         .order('version', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error, 'Get Essay Versions', { essayId });
+        throw error;
+      }
+      
+      logDiagnostic('getEssayVersions:complete', { 
+        essayId,
+        versionsFound: data?.length || 0
+      });
+      
       return data || [];
     } catch (error) {
-      console.error('Error fetching essay versions:', error);
+      logDiagnostic('getEssayVersions:error', { error, essayId }, 'error');
       return [];
     }
   };
