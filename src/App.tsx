@@ -38,6 +38,7 @@ import Categories from "./pages/books/Categories";
 import Settings from "./pages/Settings";
 import EmbedExample from "./pages/EmbedExample";
 import DebugAuth from "./pages/DebugAuth";
+import Health from "./pages/admin/Health";
 import NotFound from "./pages/NotFound";
 
 // Consolidation pages
@@ -159,8 +160,9 @@ const App = () => (
         <Route path="/forecasting/assumptions" element={<ForecastingAssumptions />} />
         <Route path="/forecasting/output" element={<ForecastingOutput />} />
         
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/debug/auth" element={<DebugAuth />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/debug/auth" element={<DebugAuth />} />
+          <Route path="/admin/health" element={<Health />} />
           
           <Route path="*" element={<NotFound />} />
             </Routes>
