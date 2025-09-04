@@ -26,6 +26,15 @@ const GreenTransitionEssayDetailTemplate = () => {
   // Auto-create essay if not found but section and slug exist (must be before any early returns)
   useEffect(() => {
     const autoCreateEssay = async () => {
+      console.log('[EssayDetail] useEffect triggered', { 
+        loading, 
+        essay: !!essay, 
+        section, 
+        slug, 
+        isAdmin, 
+        userEmail: user?.email 
+      });
+
       if (!loading && !essay && section && slug && isAdmin && user?.email) {
         console.log('[EssayDetail] Auto-creating missing essay:', { section, slug });
         
@@ -59,13 +68,25 @@ const GreenTransitionEssayDetailTemplate = () => {
             updated_by: user.email
           }).select().single();
 
-          if (!error && data) {
-            // Refresh essays to show the new one
+          if (error) {
+            console.error('[EssayDetail] Failed to auto-create essay:', error);
+          } else if (data) {
+            console.log('[EssayDetail] Essay auto-created successfully:', data);
+            // Refresh the page to show the new essay
             window.location.reload();
           }
         } catch (error) {
-          console.error('[EssayDetail] Failed to auto-create essay:', error);
+          console.error('[EssayDetail] Auto-create error:', error);
         }
+      } else {
+        console.log('[EssayDetail] Auto-create conditions not met:', {
+          loading,
+          hasEssay: !!essay,
+          hasSection: !!section,
+          hasSlug: !!slug,
+          isAdmin,
+          hasUser: !!user?.email
+        });
       }
     };
 
@@ -85,6 +106,7 @@ const GreenTransitionEssayDetailTemplate = () => {
   };
 
   if (loading) {
+    console.log('[EssayDetail] Rendering loading state');
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
         <Header />
@@ -99,14 +121,25 @@ const GreenTransitionEssayDetailTemplate = () => {
   }
 
   if (!essay || !section) {
+    console.log('[EssayDetail] Rendering not found state', { 
+      hasEssay: !!essay, 
+      hasSection: !!section,
+      slug,
+      isAdmin,
+      allEssays: essays.length 
+    });
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
         <Header />
         <main className="max-w-4xl mx-auto px-6 py-8">
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-primary mb-4">
-              {loading ? 'Loading...' : 'Essay Not Found'}
+              Essay Not Found
             </h1>
+            <p className="text-muted-foreground mb-4">
+              Slug: {slug} | Section: {section} | Admin: {isAdmin ? 'Yes' : 'No'}
+            </p>
             <Link 
               to="/green-transition"
               className="text-primary hover:text-primary/80 font-medium"
