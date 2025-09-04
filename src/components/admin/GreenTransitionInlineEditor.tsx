@@ -88,59 +88,13 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
       TableHeader,
       TableCell,
     ],
-    content: essay.content_html || '<p>Start writing your essay...</p>',
+    content: essay.content_json || essay.content_html || '<p>Start writing your essay...</p>',
     editable: isEditing,
     onUpdate: ({ editor }) => {
       setIsDirty(true);
+      console.log('[Editor] Content updated, setting dirty=true');
     },
   });
-
-  // Update editor editability when isEditing changes
-  useEffect(() => {
-    if (editor) {
-      editor.setEditable(isEditing);
-    }
-  }, [isEditing, editor]);
-
-  // Auto-save functionality
-  useEffect(() => {
-    if (autoSave && isDirty && isEditing && !isSaving) {
-      const timeoutId = setTimeout(() => {
-        handleSave();
-      }, 5000);
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isDirty, isEditing, isSaving, autoSave]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isEditing && (e.ctrlKey || e.metaKey)) {
-        switch (e.key.toLowerCase()) {
-          case 's':
-            e.preventDefault();
-            handleSave();
-            break;
-          case 'b':
-            e.preventDefault();
-            editor?.chain().focus().toggleBold().run();
-            break;
-          case 'i':
-            e.preventDefault();
-            editor?.chain().focus().toggleItalic().run();
-            break;
-          case 'u':
-            e.preventDefault();
-            editor?.chain().focus().toggleUnderline().run();
-            break;
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isEditing, editor]);
 
   const handleSave = useCallback(async () => {
     if (!editor) return;
@@ -148,7 +102,6 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
     try {
       setIsSaving(true);
       
-      // Log telemetry event
       console.log('[Telemetry] edit_saved', { 
         essayId: essay.id, 
         timestamp: new Date().toISOString() 
@@ -156,6 +109,11 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
       
       const contentHtml = editor.getHTML();
       const contentJson = editor.getJSON();
+      console.log('[Editor] Saving content:', { 
+        htmlLength: contentHtml.length,
+        hasJson: !!contentJson 
+      });
+      
       const updates: Partial<GreenEssay> = {
         title,
         subtitle,
@@ -186,6 +144,68 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
       setIsSaving(false);
     }
   }, [editor, title, subtitle, authorName, coverImageUrl, onSave, toast, essay.id]);
+
+  // Update editor content when essay changes
+  useEffect(() => {
+    if (editor && essay) {
+      const content = essay.content_json || essay.content_html || '<p>Start writing your essay...</p>';
+      console.log('[Editor] Setting content:', { 
+        hasContentJson: !!essay.content_json, 
+        hasContentHtml: !!essay.content_html,
+        content: typeof content === 'string' ? content.substring(0, 100) + '...' : content
+      });
+      editor.commands.setContent(content);
+    }
+  }, [editor, essay.content_json, essay.content_html, essay.id]);
+
+  // Update editor editability when isEditing changes
+  useEffect(() => {
+    if (editor) {
+      console.log('[Editor] Setting editable:', isEditing);
+      editor.setEditable(isEditing);
+    }
+  }, [isEditing, editor]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (autoSave && isDirty && isEditing && !isSaving && editor) {
+      console.log('[Editor] Auto-save triggered');
+      const timeoutId = setTimeout(() => {
+        handleSave();
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isDirty, isEditing, isSaving, autoSave, editor, handleSave]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditing && (e.ctrlKey || e.metaKey)) {
+        switch (e.key.toLowerCase()) {
+          case 's':
+            e.preventDefault();
+            handleSave();
+            break;
+          case 'b':
+            e.preventDefault();
+            editor?.chain().focus().toggleBold().run();
+            break;
+          case 'i':
+            e.preventDefault();
+            editor?.chain().focus().toggleItalic().run();
+            break;
+          case 'u':
+            e.preventDefault();
+            editor?.chain().focus().toggleUnderline().run();
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isEditing, editor, handleSave]);
 
   const addImage = () => {
     const url = window.prompt('Enter image URL');
