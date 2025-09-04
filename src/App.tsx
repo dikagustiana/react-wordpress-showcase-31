@@ -39,6 +39,7 @@ import Settings from "./pages/Settings";
 import EmbedExample from "./pages/EmbedExample";
 import DebugAuth from "./pages/DebugAuth";
 import Health from "./pages/admin/Health";
+import DikasTools from "./pages/DikasTools";
 import NotFound from "./pages/NotFound";
 
 // Consolidation pages
@@ -163,6 +164,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/debug/auth" element={<DebugAuth />} />
           <Route path="/admin/health" element={<Health />} />
+          <Route path="/dikas-tools" element={<DikasTools />} />
           
           <Route path="*" element={<NotFound />} />
             </Routes>

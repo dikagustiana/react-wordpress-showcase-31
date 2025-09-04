@@ -84,7 +84,7 @@ const Header = () => {
         path: '/finance-workspace',
         hasDropdown: true,
         dropdownKey: 'finance-workspace',
-        submenu: [{ label: "Dika's Tools", submenu: dikasToolsSubmenu }]
+        submenu: [{ label: "Dika's Tools", path: '/dikas-tools' }]
       }
     : { label: 'Finance Workspace', path: '/finance-workspace' };
 
@@ -185,41 +185,18 @@ const Header = () => {
                       
                       <div className={`absolute top-full left-0 mt-1 ${item.dropdownKey === 'finance101' ? 'w-72' : item.dropdownKey === 'accounting' ? 'w-64' : item.dropdownKey === 'finance-workspace' ? 'w-64' : 'w-56'} bg-primary rounded-md shadow-lg border border-primary-hover py-2 z-[60] transition-all duration-150 ${hoveredMenu === item.dropdownKey ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
                         {item.submenu?.map((subItem) => (
-                          subItem.submenu ? (
-                            // Nested submenu for "Dika's Tools"
-                            <div key={subItem.label} className="relative group">
-                              <div className="flex items-center justify-between px-4 py-3 text-sm text-primary-foreground hover:bg-primary-hover cursor-pointer border-b border-primary-hover/30 last:border-b-0">
-                                <span>{subItem.label}</span>
-                                <ChevronDown className="w-3 h-3 -rotate-90" />
-                              </div>
-                              {/* Nested dropdown */}
-                              <div className="absolute left-full top-0 ml-1 w-56 bg-background rounded-md shadow-xl border border-gray-200 py-2 z-[70] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150">
-                                {subItem.submenu?.map((nestedItem) => (
-                                  <Link 
-                                    key={nestedItem.path} 
-                                    to={nestedItem.path} 
-                                    className="block px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors border-b border-gray-100 last:border-b-0"
-                                    onClick={() => setHoveredMenu(null)}
-                                  >
-                                    {nestedItem.label}
-                                  </Link>
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            <Link 
-                              key={subItem.path} 
-                              to={subItem.path} 
-                              className={`block px-4 py-3 text-sm text-primary-foreground transition-colors border-b border-primary-hover/30 last:border-b-0 ${
-                                item.dropdownKey === 'green-transition' 
-                                  ? 'hover:text-accent hover:bg-primary-hover/50' 
-                                  : 'hover:bg-primary-hover'
-                              }`}
-                              onClick={() => setHoveredMenu(null)}
-                            >
-                              {subItem.label}
-                            </Link>
-                          )
+                          <Link 
+                            key={subItem.path} 
+                            to={subItem.path} 
+                            className={`block px-4 py-3 text-sm text-primary-foreground transition-colors border-b border-primary-hover/30 last:border-b-0 ${
+                              item.dropdownKey === 'green-transition' 
+                                ? 'hover:text-accent hover:bg-primary-hover/50' 
+                                : 'hover:bg-primary-hover'
+                            }`}
+                            onClick={() => setHoveredMenu(null)}
+                          >
+                            {subItem.label}
+                          </Link>
                         ))}
                       </div>
                     </div>
