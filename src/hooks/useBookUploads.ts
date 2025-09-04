@@ -108,8 +108,16 @@ export const useBookUploads = (category: string) => {
     try {
       setUploading(true);
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      // Check authentication first
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: 'Authentication Error',
+          description: 'Please refresh page and try again. You must be logged in as admin.',
+          variant: 'destructive',
+        });
+        return false;
+      }
 
       // Generate safe filename and path
       const now = new Date();
@@ -120,12 +128,15 @@ export const useBookUploads = (category: string) => {
       const safeFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const filepath = `books/${category}/${year}/${month}/${day}/${uuid}_${safeFilename}`;
 
-      // Upload to storage
+      // Upload to storage first
       const { error: uploadError } = await supabase.storage
         .from('books')
         .upload(filepath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw new Error(`Storage upload failed: ${uploadError.message}`);
+      }
 
       // Save metadata
       const { error: insertError } = await supabase
@@ -140,9 +151,10 @@ export const useBookUploads = (category: string) => {
         });
 
       if (insertError) {
+        console.error('Database insert error:', insertError);
         // If metadata save fails, clean up the uploaded file
         await supabase.storage.from('books').remove([filepath]);
-        throw insertError;
+        throw new Error(`Database save failed: ${insertError.message}. Please check your admin permissions.`);
       }
 
       toast({
@@ -153,6 +165,7 @@ export const useBookUploads = (category: string) => {
       fetchUploads();
       return true;
     } catch (err) {
+      console.error('Upload error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload file';
       toast({
         title: 'Upload Failed',
