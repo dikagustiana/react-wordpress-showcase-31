@@ -23,6 +23,55 @@ const GreenTransitionEssayDetailTemplate = () => {
   const essay = essays.find(e => e.slug === slug);
   const sectionTitle = sectionTitles[section || ''] || section;
 
+  // Auto-create essay if not found but section and slug exist (must be before any early returns)
+  useEffect(() => {
+    const autoCreateEssay = async () => {
+      if (!loading && !essay && section && slug && isAdmin && user?.email) {
+        console.log('[EssayDetail] Auto-creating missing essay:', { section, slug });
+        
+        const defaultContent = {
+          type: 'doc',
+          content: [
+            { 
+              type: 'heading', 
+              attrs: { level: 1 }, 
+              content: [{ type: 'text', text: 'New Essay' }] 
+            },
+            { 
+              type: 'paragraph', 
+              content: [{ type: 'text', text: 'Start writing your essay here...' }] 
+            }
+          ]
+        };
+
+        try {
+          const { data, error } = await supabase.from('green_essays').insert({
+            slug,
+            section,
+            title: 'New Essay',
+            subtitle: '',
+            author_name: user.email.split('@')[0] || 'Editor',
+            content_html: '<h1>New Essay</h1><p>Start writing your essay here...</p>',
+            content_json: defaultContent,
+            status: 'draft',
+            version: 1,
+            reading_time: 1,
+            updated_by: user.email
+          }).select().single();
+
+          if (!error && data) {
+            // Refresh essays to show the new one
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('[EssayDetail] Failed to auto-create essay:', error);
+        }
+      }
+    };
+
+    autoCreateEssay();
+  }, [loading, essay, section, slug, isAdmin, user]);
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -48,56 +97,6 @@ const GreenTransitionEssayDetailTemplate = () => {
       </div>
     );
   }
-
-  // Auto-create essay if not found but section and slug exist
-  useEffect(() => {
-    const autoCreateEssay = async () => {
-      if (!loading && !essay && section && slug && isAdmin) {
-        console.log('[EssayDetail] Auto-creating missing essay:', { section, slug });
-        
-        // Create a new essay with the expected slug
-        const defaultContent = {
-          type: 'doc',
-          content: [
-            { 
-              type: 'heading', 
-              attrs: { level: 1 }, 
-              content: [{ type: 'text', text: 'New Essay' }] 
-            },
-            { 
-              type: 'paragraph', 
-              content: [{ type: 'text', text: 'Start writing your essay here...' }] 
-            }
-          ]
-        };
-
-        try {
-          const { data, error } = await supabase.from('green_essays').insert({
-            slug,
-            section,
-            title: 'New Essay',
-            subtitle: '',
-            author_name: user?.email?.split('@')[0] || 'Editor',
-            content_html: '<h1>New Essay</h1><p>Start writing your essay here...</p>',
-            content_json: defaultContent,
-            status: 'draft',
-            version: 1,
-            reading_time: 1,
-            updated_by: user?.email || ''
-          }).select().single();
-
-          if (!error && data) {
-            // Refresh essays to show the new one
-            window.location.reload();
-          }
-        } catch (error) {
-          console.error('[EssayDetail] Failed to auto-create essay:', error);
-        }
-      }
-    };
-
-    autoCreateEssay();
-  }, [loading, essay, section, slug, isAdmin, user]);
 
   if (!essay || !section) {
     return (
