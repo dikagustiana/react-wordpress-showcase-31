@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -144,7 +145,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             {isPreview ? (
               <div 
                 className="prose prose-sm max-w-none h-full overflow-y-auto"
-                dangerouslySetInnerHTML={{ __html: editorContent }}
+                dangerouslySetInnerHTML={{ 
+                  __html: DOMPurify.sanitize(editorContent, {
+                    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre', 'div', 'span'],
+                    ALLOWED_ATTR: ['href', 'title', 'target', 'rel', 'class'],
+                    ALLOW_DATA_ATTR: false,
+                    FORCE_BODY: true,
+                    ADD_ATTR: ['target'],
+                    ADD_TAGS: ['iframe'],
+                    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover']
+                  })
+                }}
               />
             ) : (
               <Textarea
