@@ -11,7 +11,7 @@ const DikasTools = () => {
       title: 'Financial Model Platform',
       description: 'Comprehensive financial modeling and forecasting platform with advanced analytics and scenario planning capabilities.',
       icon: <TrendingUp className="w-8 h-8 text-primary" />,
-      path: '/executive-dashboard',
+      path: '/model',
       isActive: true,
       features: ['DCF Models', 'Scenario Analysis', 'Risk Assessment', 'Forecasting']
     },
