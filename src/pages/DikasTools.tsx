@@ -12,6 +12,7 @@ const DikasTools = () => {
       description: 'Comprehensive financial modeling and forecasting platform with advanced analytics and scenario planning capabilities.',
       icon: <TrendingUp className="w-8 h-8 text-primary" />,
       path: '/model',
+      testPath: '/model/test',
       isActive: true,
       features: ['DCF Models', 'Scenario Analysis', 'Risk Assessment', 'Forecasting']
     },
@@ -102,13 +103,23 @@ const DikasTools = () => {
 
                 {/* Action Button */}
                 {tool.isActive ? (
-                  <Link
-                    to={tool.path}
-                    className="inline-flex items-center justify-center w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors group-hover:shadow-lg"
-                  >
-                    Launch Platform
-                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                  </Link>
+                  <div className="space-y-2">
+                    <Link
+                      to={tool.path}
+                      className="inline-flex items-center justify-center w-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors group-hover:shadow-lg"
+                    >
+                      Launch Platform
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                    {tool.testPath && (
+                      <Link
+                        to={tool.testPath}
+                        className="inline-flex items-center justify-center w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                      >
+                        Run Test Suite
+                      </Link>
+                    )}
+                  </div>
                 ) : (
                   <div className="inline-flex items-center justify-center w-full bg-muted text-muted-foreground px-6 py-3 rounded-lg font-semibold cursor-not-allowed">
                     Coming Soon
