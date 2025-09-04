@@ -146,10 +146,26 @@ export const useGreenEssays = (section?: string) => {
       const essayData = {
         slug,
         section: sectionName,
-        title: template?.title_template || 'Untitled Essay',
-        content_html: template?.content_html || '<p>Start writing your essay...</p>',
-        content_json: template?.content_json || { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Start writing your essay...' }] }] },
+        title: template?.title_template || 'New Essay',
+        subtitle: '',
+        content_html: template?.content_html || '<h1>New Essay</h1><p>Start writing your essay here...</p>',
+        content_json: template?.content_json || { 
+          type: 'doc', 
+          content: [
+            { 
+              type: 'heading', 
+              attrs: { level: 1 }, 
+              content: [{ type: 'text', text: 'New Essay' }] 
+            },
+            { 
+              type: 'paragraph', 
+              content: [{ type: 'text', text: 'Start writing your essay here...' }] 
+            }
+          ] 
+        },
         author_name: user.email?.split('@')[0] || 'Editor',
+        cover_image_url: '',
+        reading_time: 1,
         updated_by: user.email,
         status: 'draft' as const
       };
@@ -280,6 +296,12 @@ export const useGreenEssays = (section?: string) => {
   const publishEssay = async (id: string) => {
     if (!isAdmin) return false;
 
+    // Log telemetry event
+    console.log('[Telemetry] publish_clicked', { 
+      essayId: id, 
+      timestamp: new Date().toISOString() 
+    });
+
     logDiagnostic('publishEssay:start', { essayId: id, userEmail: user?.email });
 
     try {
@@ -299,6 +321,13 @@ export const useGreenEssays = (section?: string) => {
         essayId: id,
         title: data.title,
         status: data.status
+      });
+
+      // Log telemetry event
+      console.log('[Telemetry] publish_success', { 
+        essayId: id, 
+        title: data.title,
+        timestamp: new Date().toISOString() 
       });
 
       // Log the action

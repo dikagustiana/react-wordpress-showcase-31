@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useGreenEssays } from '@/hooks/useGreenEssays';
 import { useAuthRole } from '@/hooks/useAuthRole';
 import { GreenTransitionInlineEditor } from '@/components/admin/GreenTransitionInlineEditor';
+import { supabase } from '@/integrations/supabase/client';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -15,8 +16,8 @@ const sectionTitles: Record<string, string> = {
 
 const GreenTransitionEssayDetailTemplate = () => {
   const { section, slug } = useParams<{ section: string; slug: string }>();
-  const { essays, loading, updateEssay } = useGreenEssays(section);
-  const { isAdmin } = useAuthRole();
+  const { essays, loading, updateEssay, publishEssay, unpublishEssay } = useGreenEssays(section);
+  const { isAdmin, user } = useAuthRole();
   const [isEditing, setIsEditing] = useState(false);
   
   const essay = essays.find(e => e.slug === slug);
@@ -48,13 +49,65 @@ const GreenTransitionEssayDetailTemplate = () => {
     );
   }
 
+  // Auto-create essay if not found but section and slug exist
+  useEffect(() => {
+    const autoCreateEssay = async () => {
+      if (!loading && !essay && section && slug && isAdmin) {
+        console.log('[EssayDetail] Auto-creating missing essay:', { section, slug });
+        
+        // Create a new essay with the expected slug
+        const defaultContent = {
+          type: 'doc',
+          content: [
+            { 
+              type: 'heading', 
+              attrs: { level: 1 }, 
+              content: [{ type: 'text', text: 'New Essay' }] 
+            },
+            { 
+              type: 'paragraph', 
+              content: [{ type: 'text', text: 'Start writing your essay here...' }] 
+            }
+          ]
+        };
+
+        try {
+          const { data, error } = await supabase.from('green_essays').insert({
+            slug,
+            section,
+            title: 'New Essay',
+            subtitle: '',
+            author_name: user?.email?.split('@')[0] || 'Editor',
+            content_html: '<h1>New Essay</h1><p>Start writing your essay here...</p>',
+            content_json: defaultContent,
+            status: 'draft',
+            version: 1,
+            reading_time: 1,
+            updated_by: user?.email || ''
+          }).select().single();
+
+          if (!error && data) {
+            // Refresh essays to show the new one
+            window.location.reload();
+          }
+        } catch (error) {
+          console.error('[EssayDetail] Failed to auto-create essay:', error);
+        }
+      }
+    };
+
+    autoCreateEssay();
+  }, [loading, essay, section, slug, isAdmin, user]);
+
   if (!essay || !section) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
         <Header />
         <main className="max-w-4xl mx-auto px-6 py-8">
           <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-primary mb-4">Essay Not Found</h1>
+            <h1 className="text-2xl font-bold text-primary mb-4">
+              {loading ? 'Loading...' : 'Essay Not Found'}
+            </h1>
             <Link 
               to="/green-transition"
               className="text-primary hover:text-primary/80 font-medium"
@@ -91,6 +144,8 @@ const GreenTransitionEssayDetailTemplate = () => {
                 isEditing={isEditing}
                 onToggleEdit={() => setIsEditing(!isEditing)}
                 onSave={async (updates) => await updateEssay(essay.id, updates)}
+                onPublish={async (id) => await publishEssay(id)}
+                onUnpublish={async (id) => await unpublishEssay(id)}
                 autoSave={true}
               />
             </div>

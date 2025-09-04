@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { PublishButton } from '@/components/admin/PublishButton';
 import { 
   Bold, 
   Italic, 
@@ -42,6 +43,8 @@ interface GreenTransitionInlineEditorProps {
   isEditing: boolean;
   onToggleEdit: () => void;
   onSave: (updates: Partial<GreenEssay>) => Promise<boolean>;
+  onPublish?: (id: string) => Promise<boolean>;
+  onUnpublish?: (id: string) => Promise<boolean>;
   autoSave?: boolean;
 }
 
@@ -50,6 +53,8 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
   isEditing,
   onToggleEdit,
   onSave,
+  onPublish,
+  onUnpublish,
   autoSave = true
 }) => {
   const [title, setTitle] = useState(essay.title);
@@ -143,13 +148,21 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
     try {
       setIsSaving(true);
       
+      // Log telemetry event
+      console.log('[Telemetry] edit_saved', { 
+        essayId: essay.id, 
+        timestamp: new Date().toISOString() 
+      });
+      
       const contentHtml = editor.getHTML();
+      const contentJson = editor.getJSON();
       const updates: Partial<GreenEssay> = {
         title,
         subtitle,
         author_name: authorName,
         cover_image_url: coverImageUrl,
         content_html: contentHtml,
+        content_json: contentJson,
       };
 
       const success = await onSave(updates);
@@ -172,7 +185,7 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
     } finally {
       setIsSaving(false);
     }
-  }, [editor, title, subtitle, authorName, coverImageUrl, onSave, toast]);
+  }, [editor, title, subtitle, authorName, coverImageUrl, onSave, toast, essay.id]);
 
   const addImage = () => {
     const url = window.prompt('Enter image URL');
@@ -213,7 +226,16 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
           <Button 
             variant={isEditing ? "default" : "outline"}
             size="sm"
-            onClick={onToggleEdit}
+            onClick={() => {
+              // Log telemetry event when edit is opened
+              if (!isEditing) {
+                console.log('[Telemetry] edit_opened', { 
+                  essayId: essay.id, 
+                  timestamp: new Date().toISOString() 
+                });
+              }
+              onToggleEdit();
+            }}
           >
             {isEditing ? (
               <>
@@ -234,6 +256,15 @@ export const GreenTransitionInlineEditor: React.FC<GreenTransitionInlineEditorPr
         </div>
         
         <div className="flex items-center space-x-4">
+          {onPublish && onUnpublish && (
+            <PublishButton
+              essayId={essay.id}
+              currentStatus={essay.status}
+              onPublish={onPublish}
+              onUnpublish={onUnpublish}
+            />
+          )}
+          
           {isEditing && (
             <>
               {isSaving && (

@@ -80,20 +80,28 @@ export async function createEssayAPI(request: CreateEssayRequest): Promise<Creat
     const essayData = {
       slug,
       section: request.section,
-      title: template?.title_template || 'Untitled Essay',
+      title: template?.title_template || 'New Essay',
       subtitle: '', // Default empty subtitle
       author_name: request.created_by.split('@')[0] || 'Editor',
-      cover_image_url: '/assets/placeholders/cover_default.webp', // Default placeholder
-      content_html: template?.content_html || '<h1>New Essay</h1><p>Start writing your essay...</p>',
+      cover_image_url: '', // Default empty, user can add later
+      content_html: template?.content_html || '<h1>New Essay</h1><p>Start writing your essay here...</p>',
       content_json: template?.content_json || {
         type: 'doc',
         content: [
-          { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'New Essay' }] },
-          { type: 'paragraph', content: [{ type: 'text', text: 'Start writing your essay...' }] }
+          { 
+            type: 'heading', 
+            attrs: { level: 1 }, 
+            content: [{ type: 'text', text: 'New Essay' }] 
+          },
+          { 
+            type: 'paragraph', 
+            content: [{ type: 'text', text: 'Start writing your essay here...' }] 
+          }
         ]
       },
       status: 'draft' as const,
       version: 1,
+      reading_time: 1, // Default 1 minute
       updated_by: request.created_by
     };
 
