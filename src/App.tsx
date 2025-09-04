@@ -87,8 +87,8 @@ const App = () => (
           <Route path="/critical-thinking-research/:phase/:essayId" element={<EssayDetailTemplate />} />
           
           {/* Green Transition Routes */}
-          <Route path="/green-transition/:phase" element={<GreenTransitionEssayListTemplate />} />
-          <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayDetailTemplate />} />
+          <Route path="/green-transition/:section" element={<GreenTransitionEssayListTemplate />} />
+          <Route path="/green-transition/:section/:slug" element={<GreenTransitionEssayDetailTemplate />} />
           <Route path="/accounting" element={<Accounting />} />
           <Route path="/accounting/fsli" element={<FSLI />} />
           <Route path="/accounting/consolidated-reporting" element={<ConsolidatedReporting />} />

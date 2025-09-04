@@ -16,13 +16,41 @@ const GreenTransitionEssayDetailTemplate = () => {
   const { isAdmin, user } = useAuthRole();
   const [isEditing, setIsEditing] = useState(false);
   
-  const essay = essays.find(e => e.slug === slug);
+  const foundEssay = essays.find(e => e.slug === slug);
   const sectionKey = section as SectionKey;
   const sectionTitle = SECTION_TITLES[sectionKey] || section;
 
+  // Create template essay when no essay found
+  const templateEssay = !foundEssay ? {
+    id: `template-${slug}`,
+    slug: slug || '',
+    section_key: sectionKey,
+    section: sectionTitle,
+    title: 'New Essay',
+    subtitle: 'Click Edit to start writing your essay...',
+    author_name: user?.email?.split('@')[0] || 'Author',
+    cover_image_url: '/assets/placeholders/cover_default.webp',
+    content_html: '<h1>New Essay</h1><p>Start writing your essay here...</p>',
+    content_json: {
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'New Essay' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'Start writing your essay here...' }] }
+      ]
+    },
+    status: 'draft' as const,
+    version: 1,
+    reading_time: 1,
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_by: user?.email || 'system'
+  } : null;
+
+  const essay = foundEssay || templateEssay;
+
   // Check if edit mode should be enabled from query params
   useEffect(() => {
-    if (searchParams.get('edit') === '1' && isAdmin && essay && !essay.id.startsWith('dummy-')) {
+    if (searchParams.get('edit') === '1' && isAdmin && essay && !essay.id.startsWith('dummy-') && !essay.id.startsWith('template-')) {
       console.log('[Telemetry] edit_opened', { 
         essayId: essay.id, 
         timestamp: new Date().toISOString() 
@@ -31,19 +59,28 @@ const GreenTransitionEssayDetailTemplate = () => {
     }
   }, [searchParams, isAdmin, essay]);
 
+  // Auto-redirect to edit mode for template essays
+  useEffect(() => {
+    if (templateEssay && isAdmin && !searchParams.get('edit')) {
+      const newUrl = `${window.location.pathname}?edit=1`;
+      window.history.replaceState({}, '', newUrl);
+      setIsEditing(true);
+    }
+  }, [templateEssay, isAdmin, searchParams]);
+
   // Auto-create essay if not found but section and slug exist (must be before any early returns)
   useEffect(() => {
     const autoCreateEssay = async () => {
       console.log('[EssayDetail] useEffect triggered', { 
         loading, 
-        essay: !!essay, 
+        essay: !!foundEssay, 
         section, 
         slug, 
         isAdmin, 
         userEmail: user?.email 
       });
 
-      if (!loading && !essay && section && slug && isAdmin && user?.email) {
+      if (!loading && !foundEssay && section && slug && isAdmin && user?.email) {
         console.log('[EssayDetail] Auto-creating missing essay:', { section, slug });
         
         const defaultContent = {
@@ -89,7 +126,7 @@ const GreenTransitionEssayDetailTemplate = () => {
       } else {
         console.log('[EssayDetail] Auto-create conditions not met:', {
           loading,
-          hasEssay: !!essay,
+          hasEssay: !!foundEssay,
           hasSection: !!section,
           hasSlug: !!slug,
           isAdmin,
@@ -99,7 +136,7 @@ const GreenTransitionEssayDetailTemplate = () => {
     };
 
     autoCreateEssay();
-  }, [loading, essay, section, slug, isAdmin, user]);
+  }, [loading, foundEssay, section, slug, isAdmin, user]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -128,15 +165,31 @@ const GreenTransitionEssayDetailTemplate = () => {
     );
   }
 
-  if (!essay || !section) {
-    console.log('[EssayDetail] Rendering not found state', { 
-      hasEssay: !!essay, 
-      hasSection: !!section,
-      slug,
-      isAdmin,
-      allEssays: essays.length 
-    });
-    
+  // Show essay template even if essay not found, but section exists
+  if (!section) {
+    console.log('[EssayDetail] No section found, redirecting');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
+        <Header />
+        <main className="max-w-4xl mx-auto px-6 py-8">
+          <div className="text-center py-12">
+            <h1 className="text-2xl font-bold text-primary mb-4">
+              Page Not Found
+            </h1>
+            <Link 
+              to="/green-transition"
+              className="text-primary hover:text-primary/80 font-medium"
+            >
+              ← Back to The Green Transition
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!essay) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
         <Header />
@@ -145,9 +198,6 @@ const GreenTransitionEssayDetailTemplate = () => {
             <h1 className="text-2xl font-bold text-primary mb-4">
               Essay Not Found
             </h1>
-            <p className="text-muted-foreground mb-4">
-              Slug: {slug} | Section: {section} | Admin: {isAdmin ? 'Yes' : 'No'}
-            </p>
             <Link 
               to="/green-transition"
               className="text-primary hover:text-primary/80 font-medium"
@@ -177,7 +227,7 @@ const GreenTransitionEssayDetailTemplate = () => {
 
         {/* Article with Inline Editor */}
         <article className="bg-card rounded-lg shadow-sm overflow-hidden">
-          {isAdmin && essay && !essay.id.startsWith('dummy-') ? (
+          {isAdmin && essay && !essay.id.startsWith('dummy-') && !essay.id.startsWith('template-') ? (
             <div className="p-8">
               <GreenTransitionInlineEditor
                 essay={essay}
@@ -186,6 +236,22 @@ const GreenTransitionEssayDetailTemplate = () => {
                 onSave={async (updates) => await updateEssay(essay.id, updates)}
                 onPublish={async (id) => await publishEssay(id)}
                 onUnpublish={async (id) => await unpublishEssay(id)}
+                autoSave={true}
+              />
+            </div>
+          ) : isAdmin && essay && essay.id.startsWith('template-') ? (
+            <div className="p-8">
+              <GreenTransitionInlineEditor
+                essay={essay}
+                isEditing={isEditing}
+                onToggleEdit={() => setIsEditing(!isEditing)}
+                onSave={async (updates) => {
+                  // For template essays, create new essay instead of updating
+                  console.log('[Template] Creating new essay from template:', updates);
+                  return true;
+                }}
+                onPublish={async (id) => { return true; }}
+                onUnpublish={async (id) => { return true; }}
                 autoSave={true}
               />
             </div>
@@ -204,7 +270,7 @@ const GreenTransitionEssayDetailTemplate = () => {
               
               <div className="p-8">
                 {/* Dummy Content Banner */}
-                {essay.id.startsWith('dummy-') && (
+                {(essay.id.startsWith('dummy-') || essay.id.startsWith('template-')) && (
                   <div className="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
@@ -214,10 +280,15 @@ const GreenTransitionEssayDetailTemplate = () => {
                       </div>
                       <div className="ml-3">
                         <h3 className="text-sm font-medium text-blue-800">
-                          Konten Demo
+                          {essay.id.startsWith('template-') ? 'New Essay Template' : 'Konten Demo'}
                         </h3>
                         <div className="mt-2 text-sm text-blue-700">
-                          <p>Ini adalah konten dummy untuk demonstrasi. Konten ini akan digantikan dengan essay sesungguhnya ketika admin mulai membuat dan menerbitkan essay melalui sistem inline editor.</p>
+                          <p>
+                            {essay.id.startsWith('template-') 
+                              ? 'This is a new essay template. Start editing to create your content.'
+                              : 'Ini adalah konten dummy untuk demonstrasi. Konten ini akan digantikan dengan essay sesungguhnya ketika admin mulai membuat dan menerbitkan essay melalui sistem inline editor.'
+                            }
+                          </p>
                         </div>
                       </div>
                     </div>
