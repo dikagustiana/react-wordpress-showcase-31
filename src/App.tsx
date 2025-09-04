@@ -24,6 +24,7 @@ import EssayDetailTemplate from "./components/EssayDetailTemplate";
 import GreenTransitionEssayListTemplate from "./components/GreenTransitionEssayListTemplate";
 import GreenTransitionEssayDetailTemplate from "./components/GreenTransitionEssayDetailTemplate";
 import BookListPage from "./pages/books/BookListPage";
+import PdfReaderPage from "./pages/books/PdfReaderPage";
 import Finance101 from "./pages/Finance101";
 import FinanceWorkspace from "./pages/FinanceWorkspace";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
@@ -110,8 +111,9 @@ const App = () => (
           <Route path="/finance-101/cfa-prep" element={<CFAPrep />} />
           <Route path="/english-ielts" element={<EnglishIELTS />} />
           <Route path="/books-academia" element={<BooksAcademia />} />
-          <Route path="/books/categories" element={<Categories />} />
-          <Route path="/books/:category" element={<BookListPage />} />
+                    <Route path="/books/categories" element={<Categories />} />
+                    <Route path="/books/:category" element={<BookListPage />} />
+                    <Route path="/books/:category/:bookId/read" element={<PdfReaderPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/embed-example" element={<EmbedExample />} />
           

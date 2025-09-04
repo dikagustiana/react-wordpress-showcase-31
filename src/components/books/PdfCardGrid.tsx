@@ -13,16 +13,19 @@ import { format, isAfter, subDays } from 'date-fns';
 import { useRole } from '@/contexts/RoleContext';
 import { useToast } from '@/hooks/use-toast';
 import type { BookUpload } from '@/hooks/useBookUploads';
+import type { BookUploadExtended } from '@/types/books';
+import { BookCover } from './BookCover';
 
 interface PdfCardGridProps {
-  uploads: BookUpload[];
+  uploads: BookUploadExtended[];
   loading: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
   showDeleted: boolean;
   onShowDeletedChange: (show: boolean) => void;
-  onDownload: (upload: BookUpload) => void;
-  onDelete: (upload: BookUpload) => void;
+  onDownload: (upload: BookUploadExtended) => void;
+  onDelete: (upload: BookUploadExtended) => void;
+  onReplaceCover?: (upload: BookUploadExtended) => void;
   currentPage: number;
   totalCount: number;
   itemsPerPage: number;
@@ -50,6 +53,7 @@ export const PdfCardGrid: React.FC<PdfCardGridProps> = ({
   onShowDeletedChange,
   onDownload,
   onDelete,
+  onReplaceCover,
   currentPage,
   totalCount,
   itemsPerPage,
@@ -58,7 +62,7 @@ export const PdfCardGrid: React.FC<PdfCardGridProps> = ({
   const { isAdmin } = useRole();
   const { toast } = useToast();
   const [sortBy, setSortBy] = useState('uploaded_at_desc');
-  const [deleteTarget, setDeleteTarget] = useState<BookUpload | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BookUploadExtended | null>(null);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -105,11 +109,12 @@ export const PdfCardGrid: React.FC<PdfCardGridProps> = ({
     return sorted;
   }, [uploads, sortBy]);
 
-  const handleOpen = (upload: BookUpload) => {
-    onDownload(upload); // This opens in new tab
+  const handleOpen = (upload: BookUploadExtended) => {
+    // Navigate to reader page instead of downloading
+    window.open(`/books/${upload.category}/${upload.id}/read`, '_blank');
   };
 
-  const handleCopyLink = async (upload: BookUpload) => {
+  const handleCopyLink = async (upload: BookUploadExtended) => {
     try {
       // Create a simple link - in real implementation, this would be a proper share URL
       const link = `${window.location.origin}/books/file/${upload.id}`;
@@ -236,72 +241,83 @@ export const PdfCardGrid: React.FC<PdfCardGridProps> = ({
             {sortedUploads.map((upload) => (
               <Card key={upload.id} className="group overflow-hidden hover:shadow-lg transition-all duration-200 border-border hover:border-primary/20">
                 <CardContent className="p-6">
-                  {/* Header with Icon and Title */}
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="relative">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-5 h-5 text-primary" />
-                      </div>
-                      {isNewFile(upload.uploaded_at) && (
-                        <div className="absolute -top-1 -right-1">
-                          <Badge variant="secondary" className="text-xs px-1 py-0 bg-green-100 text-green-800 border-green-200">
-                            New
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 
-                        className="font-medium text-foreground line-clamp-2 text-sm leading-tight mb-1" 
-                        title={upload.filename}
-                      >
-                        {upload.filename.replace(/\.[^/.]+$/, "")}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        PDF • {formatFileSize(upload.size_bytes)}
-                      </p>
-                    </div>
+                   {/* Cover Image */}
+                   <div className="mb-4">
+                     <BookCover 
+                       book={upload}
+                       className="w-full h-48 object-cover"
+                     />
+                   </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleOpen(upload)}>
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Open
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onDownload(upload)}>
-                          <Download className="w-4 h-4 mr-2" />
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleCopyLink(upload)}>
-                          <Copy className="w-4 h-4 mr-2" />
-                          Copy Link
-                        </DropdownMenuItem>
-                        {isAdmin && (
-                          <>
-                            <DropdownMenuItem>
-                              <Replace className="w-4 h-4 mr-2" />
-                              Replace
-                            </DropdownMenuItem>
-                            {!upload.deleted_at && (
-                              <DropdownMenuItem 
-                                onClick={() => setDeleteTarget(upload)}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            )}
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                   {/* Header with Title */}
+                   <div className="flex items-start gap-3 mb-4">
+                     <div className="relative">
+                       {isNewFile(upload.uploaded_at) && (
+                         <div className="absolute -top-1 -right-1 z-10">
+                           <Badge variant="secondary" className="text-xs px-1 py-0 bg-green-100 text-green-800 border-green-200">
+                             New
+                           </Badge>
+                         </div>
+                       )}
+                     </div>
+                     
+                     <div className="flex-1 min-w-0">
+                       <h3 
+                         className="font-medium text-foreground line-clamp-2 text-sm leading-tight mb-1" 
+                         title={upload.title || upload.filename}
+                       >
+                         {upload.title || upload.filename.replace(/\.[^/.]+$/, "")}
+                       </h3>
+                       <p className="text-xs text-muted-foreground">
+                         {upload.author && `By ${upload.author}`}
+                         {upload.year && ` • ${upload.year}`}
+                       </p>
+                       <p className="text-xs text-muted-foreground">
+                         PDF • {formatFileSize(upload.size_bytes)}
+                       </p>
+                     </div>
+
+                     <DropdownMenu>
+                       <DropdownMenuTrigger asChild>
+                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <MoreVertical className="h-4 w-4" />
+                         </Button>
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent align="end">
+                         <DropdownMenuItem onClick={() => handleOpen(upload)}>
+                           <ExternalLink className="w-4 h-4 mr-2" />
+                           Read
+                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => onDownload(upload)}>
+                           <Download className="w-4 h-4 mr-2" />
+                           Download
+                         </DropdownMenuItem>
+                         <DropdownMenuItem onClick={() => handleCopyLink(upload)}>
+                           <Copy className="w-4 h-4 mr-2" />
+                           Copy Link
+                         </DropdownMenuItem>
+                         {isAdmin && (
+                           <>
+                             {onReplaceCover && (
+                               <DropdownMenuItem onClick={() => onReplaceCover(upload)}>
+                                 <Replace className="w-4 h-4 mr-2" />
+                                 Replace Cover
+                               </DropdownMenuItem>
+                             )}
+                             {!upload.deleted_at && (
+                               <DropdownMenuItem 
+                                 onClick={() => setDeleteTarget(upload as BookUploadExtended)}
+                                 className="text-destructive focus:text-destructive"
+                               >
+                                 <Trash2 className="w-4 h-4 mr-2" />
+                                 Delete
+                               </DropdownMenuItem>
+                             )}
+                           </>
+                         )}
+                       </DropdownMenuContent>
+                     </DropdownMenu>
+                   </div>
 
                   {/* Metadata */}
                   <div className="space-y-2 mb-4">
@@ -318,26 +334,26 @@ export const PdfCardGrid: React.FC<PdfCardGridProps> = ({
                     </div>
                   </div>
 
-                  {/* Quick Actions */}
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleOpen(upload)}
-                      className="flex-1 h-8 text-xs"
-                    >
-                      <ExternalLink className="w-3 h-3 mr-1" />
-                      Open
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => onDownload(upload)}
-                      className="h-8 px-2"
-                    >
-                      <Download className="w-3 h-3" />
-                    </Button>
-                  </div>
+                   {/* Quick Actions */}
+                   <div className="flex gap-2">
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       onClick={() => handleOpen(upload)}
+                       className="flex-1 h-8 text-xs"
+                     >
+                       <ExternalLink className="w-3 h-3 mr-1" />
+                       Read
+                     </Button>
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       onClick={() => onDownload(upload)}
+                       className="h-8 px-2"
+                     >
+                       <Download className="w-3 h-3" />
+                     </Button>
+                   </div>
                 </CardContent>
               </Card>
             ))}
@@ -389,10 +405,10 @@ export const PdfCardGrid: React.FC<PdfCardGridProps> = ({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (deleteTarget) {
-                  onDelete(deleteTarget);
-                  setDeleteTarget(null);
-                }
+                 if (deleteTarget) {
+                   onDelete(deleteTarget as BookUploadExtended);
+                   setDeleteTarget(null);
+                 }
               }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

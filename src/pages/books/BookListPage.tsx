@@ -13,7 +13,7 @@ import { PdfCardGrid } from '../../components/books/PdfCardGrid';
 import { useBooks, useFilteredBooks } from '../../hooks/useBooks';
 import { useCategoryMetadata } from '../../hooks/useCategoryMetadata';
 import { useBookUploads } from '../../hooks/useBookUploads';
-import { BookFilters } from '../../types/books';
+import type { BookUploadExtended, BookFilters } from '../../types/books';
 import { CATEGORY_NAMES } from '../../config/books';
 
 const BOOKS_PER_PAGE = 24;
@@ -128,7 +128,7 @@ const BookListPage = () => {
             
             {/* PDF Files Grid */}
             <PdfCardGrid
-              uploads={bookUploads.uploads}
+              uploads={bookUploads.uploads as BookUploadExtended[]}
               loading={bookUploads.loading}
               searchTerm={bookUploads.searchTerm}
               onSearchChange={bookUploads.setSearchTerm}
@@ -136,6 +136,10 @@ const BookListPage = () => {
               onShowDeletedChange={bookUploads.setShowDeleted}
               onDownload={bookUploads.downloadFile}
               onDelete={bookUploads.deleteFile}
+              onReplaceCover={async (upload) => {
+                // Implement cover replacement logic
+                console.log('Replace cover for:', upload.id);
+              }}
               currentPage={bookUploads.currentPage}
               totalCount={bookUploads.totalCount}
               itemsPerPage={bookUploads.itemsPerPage}

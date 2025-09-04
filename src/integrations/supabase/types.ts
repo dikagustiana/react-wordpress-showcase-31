@@ -16,40 +16,64 @@ export type Database = {
     Tables: {
       books_uploads: {
         Row: {
+          author: string | null
           category: string
+          cover_color: string | null
+          cover_height: number | null
+          cover_path: string | null
+          cover_width: number | null
           deleted_at: string | null
           filename: string
           filepath: string
           id: string
           mime_type: string
           size_bytes: number
+          tags: string[] | null
+          title: string | null
           uploaded_at: string
           uploaded_by: string
           version: number
+          year: number | null
         }
         Insert: {
+          author?: string | null
           category: string
+          cover_color?: string | null
+          cover_height?: number | null
+          cover_path?: string | null
+          cover_width?: number | null
           deleted_at?: string | null
           filename: string
           filepath: string
           id?: string
           mime_type: string
           size_bytes: number
+          tags?: string[] | null
+          title?: string | null
           uploaded_at?: string
           uploaded_by: string
           version?: number
+          year?: number | null
         }
         Update: {
+          author?: string | null
           category?: string
+          cover_color?: string | null
+          cover_height?: number | null
+          cover_path?: string | null
+          cover_width?: number | null
           deleted_at?: string | null
           filename?: string
           filepath?: string
           id?: string
           mime_type?: string
           size_bytes?: number
+          tags?: string[] | null
+          title?: string | null
           uploaded_at?: string
           uploaded_by?: string
           version?: number
+          year?: number | null
         }
         Relationships: []
       }
