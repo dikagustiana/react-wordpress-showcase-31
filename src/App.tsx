@@ -88,9 +88,6 @@ const App = () => (
           <Route path="/critical-thinking-research/:phase" element={<EssayListTemplate />} />
           <Route path="/critical-thinking-research/:phase/:essayId" element={<EssayDetailTemplate />} />
           
-          {/* Green Transition Routes */}
-          <Route path="/green-transition/:section" element={<GreenTransitionEssayListTemplate />} />
-          <Route path="/green-transition/:section/:slug" element={<GreenTransitionEssayDetailTemplate />} />
           <Route path="/accounting" element={<Accounting />} />
           <Route path="/accounting/fsli" element={<FSLI />} />
           <Route path="/accounting/consolidated-reporting" element={<ConsolidatedReporting />} />
@@ -99,6 +96,10 @@ const App = () => (
           <Route path="/green-transition/now" element={<GreenTransitionNow />} />
           <Route path="/green-transition/gaps" element={<GreenTransitionGaps />} />
           <Route path="/green-transition/future" element={<GreenTransitionFuture />} />
+          
+          {/* Green Transition Essay Routes - Must come after specific routes */}
+          <Route path="/green-transition/:phase" element={<GreenTransitionEssayListTemplate />} />
+          <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayDetailTemplate />} />
           <Route path="/finance-101" element={<Finance101 />} />
           <Route path="/finance-workspace" element={<FinanceWorkspace />} />
           <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
