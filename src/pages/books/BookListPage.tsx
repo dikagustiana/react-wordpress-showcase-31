@@ -9,7 +9,7 @@ import BookListToolbar from '../../components/books/BookListToolbar';
 import BookPagination from '../../components/books/BookPagination';
 import CategoryHero from '../../components/books/CategoryHero';
 import { BookUploadButton } from '../../components/books/BookUploadButton';
-import { BookUploadsTable } from '../../components/books/BookUploadsTable';
+import { PdfCardGrid } from '../../components/books/PdfCardGrid';
 import { useBooks, useFilteredBooks } from '../../hooks/useBooks';
 import { useCategoryMetadata } from '../../hooks/useCategoryMetadata';
 import { useBookUploads } from '../../hooks/useBookUploads';
@@ -126,8 +126,8 @@ const BookListPage = () => {
               />
             </div>
             
-            {/* PDF Files List */}
-            <BookUploadsTable
+            {/* PDF Files Grid */}
+            <PdfCardGrid
               uploads={bookUploads.uploads}
               loading={bookUploads.loading}
               searchTerm={bookUploads.searchTerm}
