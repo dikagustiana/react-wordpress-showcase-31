@@ -8,11 +8,11 @@ import BookCard from '../../components/books/BookCard';
 import BookListToolbar from '../../components/books/BookListToolbar';
 import BookPagination from '../../components/books/BookPagination';
 import CategoryHero from '../../components/books/CategoryHero';
-import { BookUploadManager } from '../../components/books/BookUploadManager';
-import { BookFileList } from '../../components/books/BookFileList';
+import { BookUploadButton } from '../../components/books/BookUploadButton';
+import { BookUploadsTable } from '../../components/books/BookUploadsTable';
 import { useBooks, useFilteredBooks } from '../../hooks/useBooks';
 import { useCategoryMetadata } from '../../hooks/useCategoryMetadata';
-import { useBookFiles } from '../../hooks/useBookFiles';
+import { useBookUploads } from '../../hooks/useBookUploads';
 import { BookFilters } from '../../types/books';
 import { CATEGORY_NAMES } from '../../config/books';
 
@@ -30,7 +30,7 @@ const BookListPage = () => {
   const { books, loading, error } = useBooks(category || '');
   const filteredBooks = useFilteredBooks(books, filters);
   const { metadata, stats } = useCategoryMetadata(category || '', books);
-  const { refreshTrigger, triggerRefresh } = useBookFiles();
+  const bookUploads = useBookUploads(category || '');
   
   const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
   const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
@@ -142,17 +142,29 @@ const BookListPage = () => {
         <div id="books-section" className="max-w-7xl mx-auto px-6 py-8">
           
           {/* PDF Upload Section */}
-          <BookUploadManager
-            category={category || ''}
-            onUploadSuccess={triggerRefresh}
-          />
-
-          {/* PDF Files List */}
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Uploaded PDFs</h2>
-            <BookFileList
-              category={category || ''}
-              refreshTrigger={refreshTrigger}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold">PDF Resources</h2>
+              <BookUploadButton
+                onUpload={bookUploads.uploadFile}
+                uploading={bookUploads.uploading}
+              />
+            </div>
+            
+            {/* PDF Files List */}
+            <BookUploadsTable
+              uploads={bookUploads.uploads}
+              loading={bookUploads.loading}
+              searchTerm={bookUploads.searchTerm}
+              onSearchChange={bookUploads.setSearchTerm}
+              showDeleted={bookUploads.showDeleted}
+              onShowDeletedChange={bookUploads.setShowDeleted}
+              onDownload={bookUploads.downloadFile}
+              onDelete={bookUploads.deleteFile}
+              currentPage={bookUploads.currentPage}
+              totalCount={bookUploads.totalCount}
+              itemsPerPage={bookUploads.itemsPerPage}
+              onPageChange={bookUploads.setCurrentPage}
             />
           </div>
 
