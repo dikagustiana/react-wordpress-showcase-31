@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      books_uploads: {
+        Row: {
+          category: string
+          deleted_at: string | null
+          filename: string
+          filepath: string
+          id: string
+          mime_type: string
+          size_bytes: number
+          uploaded_at: string
+          uploaded_by: string
+          version: number
+        }
+        Insert: {
+          category: string
+          deleted_at?: string | null
+          filename: string
+          filepath: string
+          id?: string
+          mime_type: string
+          size_bytes: number
+          uploaded_at?: string
+          uploaded_by: string
+          version?: number
+        }
+        Update: {
+          category?: string
+          deleted_at?: string | null
+          filename?: string
+          filepath?: string
+          id?: string
+          mime_type?: string
+          size_bytes?: number
+          uploaded_at?: string
+          uploaded_by?: string
+          version?: number
+        }
+        Relationships: []
+      }
       embeds: {
         Row: {
           created_at: string | null

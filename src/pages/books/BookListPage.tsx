@@ -8,8 +8,11 @@ import BookCard from '../../components/books/BookCard';
 import BookListToolbar from '../../components/books/BookListToolbar';
 import BookPagination from '../../components/books/BookPagination';
 import CategoryHero from '../../components/books/CategoryHero';
+import { BookUploadManager } from '../../components/books/BookUploadManager';
+import { BookFileList } from '../../components/books/BookFileList';
 import { useBooks, useFilteredBooks } from '../../hooks/useBooks';
 import { useCategoryMetadata } from '../../hooks/useCategoryMetadata';
+import { useBookFiles } from '../../hooks/useBookFiles';
 import { BookFilters } from '../../types/books';
 import { CATEGORY_NAMES } from '../../config/books';
 
@@ -27,6 +30,7 @@ const BookListPage = () => {
   const { books, loading, error } = useBooks(category || '');
   const filteredBooks = useFilteredBooks(books, filters);
   const { metadata, stats } = useCategoryMetadata(category || '', books);
+  const { refreshTrigger, triggerRefresh } = useBookFiles();
   
   const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
   const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
@@ -136,6 +140,21 @@ const BookListPage = () => {
 
         {/* Books Section */}
         <div id="books-section" className="max-w-7xl mx-auto px-6 py-8">
+          
+          {/* PDF Upload Section */}
+          <BookUploadManager
+            category={category || ''}
+            onUploadSuccess={triggerRefresh}
+          />
+
+          {/* PDF Files List */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Uploaded PDFs</h2>
+            <BookFileList
+              category={category || ''}
+              refreshTrigger={refreshTrigger}
+            />
+          </div>
 
           {books.length === 0 ? (
             /* Empty State */
