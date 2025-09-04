@@ -87,33 +87,8 @@ const BookListPage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1">
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            <Breadcrumb items={breadcrumbItems} />
-            <div className="flex items-center justify-center py-20">
-              <div className="text-center">
-                <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-foreground mb-2">Error Loading Books</h2>
-                <p className="text-muted-foreground mb-6">{error}</p>
-                <Link
-                  to="/books/categories"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Categories
-                </Link>
-              </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  // Don't show error screen if only the old JSON books fail to load
+  // We'll handle this gracefully in the main render
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -168,8 +143,8 @@ const BookListPage = () => {
             />
           </div>
 
-          {books.length === 0 ? (
-            /* Empty State */
+          {books.length === 0 && !error ? (
+            /* Empty State - only show if no error */
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -179,7 +154,7 @@ const BookListPage = () => {
                 </p>
               </div>
             </div>
-          ) : (
+          ) : books.length > 0 ? (
             <>
               {/* Toolbar */}
               <BookListToolbar
@@ -218,7 +193,18 @@ const BookListPage = () => {
                 </>
               )}
             </>
-          )}
+          ) : error ? (
+            /* Error State - show this if JSON books failed but still allow PDF uploads */
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">Traditional Books Unavailable</h3>
+                <p className="text-muted-foreground">
+                  Book catalog is temporarily unavailable. You can still upload and access PDF resources above.
+                </p>
+              </div>
+            </div>
+          ) : null}
         </div>
       </main>
 
