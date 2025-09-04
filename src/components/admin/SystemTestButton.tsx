@@ -115,6 +115,8 @@ export const SystemTestButton: React.FC = () => {
     try {
       const response = await createEssayAPI({
         section: 'where-we-are-now',
+        title: 'System Test Essay',
+        author: user.email?.split('@')[0] || 'System',
         created_by: user.email
       });
 

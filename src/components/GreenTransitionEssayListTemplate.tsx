@@ -1,38 +1,34 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, TreePine, Plus, Clock, User, Calendar } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthRole } from '@/hooks/useAuthRole';
 import { useGreenEssays } from '@/hooks/useGreenEssays';
-import { AddEssayButton } from '@/components/admin/AddEssayButton';
+import { AddEssayModal } from '@/components/admin/AddEssayModal';
+import { SECTION_TITLES, SECTION_DESCRIPTIONS, buildEssayUrl, type SectionKey } from '@/constants/sections';
 import Header from './Header';
 import Footer from './Footer';
-
-const sectionTitles: Record<string, string> = {
-  'where-we-are-now': 'Where We Are Now',
-  'challenges-ahead': 'Challenges Ahead',
-  'pathways-forward': 'Pathways Forward'
-};
-
-const sectionDescriptions: Record<string, string> = {
-  'where-we-are-now': 'Summarize the current state: energy mix, emissions, active policies, and key barriers.',
-  'challenges-ahead': 'Identify gaps in policy, funding, technology, infrastructure, and market readiness.',
-  'pathways-forward': 'Roadmap for implementation: sector priorities, sequence of initiatives, funding, and metrics.'
-};
 
 const GreenTransitionEssayListTemplate = () => {
   const { phase } = useParams<{ phase: string }>();
   const { isAdmin } = useAuthRole();
-  const { essays, loading, refreshEssays } = useGreenEssays(phase);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { essays, loading, refreshEssays } = useGreenEssays(phase as SectionKey);
+  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleEssayCreated = async (essayId: string, slug: string, path: string) => {
+    // Close modal
+    setShowModal(false);
+    
     // Refresh the essay list to show the new essay
     await refreshEssays();
-    setRefreshTrigger(prev => prev + 1);
+    
+    // Navigate to the new essay in edit mode
+    navigate(`${path}?edit=1`);
   };
   
-  const sectionTitle = sectionTitles[phase || ''] || 'Essays';
-  const sectionDescription = sectionDescriptions[phase || ''] || 'Explore essays in this section.';
+  const sectionKey = phase as SectionKey;
+  const sectionTitle = SECTION_TITLES[sectionKey] || 'Essays';
+  const sectionDescription = SECTION_DESCRIPTIONS[sectionKey] || 'Explore essays in this section.';
 
   if (loading) {
     return (
@@ -96,10 +92,13 @@ const GreenTransitionEssayListTemplate = () => {
             
             {/* Add Essay Button (Admin Only) */}
             {isAdmin && (
-              <AddEssayButton 
-                section={phase}
-                onEssayCreated={handleEssayCreated}
-              />
+              <button
+                onClick={() => setShowModal(true)}
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-semibold transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Essay
+              </button>
             )}
           </div>
         </div>
@@ -127,7 +126,7 @@ const GreenTransitionEssayListTemplate = () => {
             {essays.map((essay) => (
               <Link
                 key={essay.id}
-                to={`/green-transition/${phase}/${essay.slug}`}
+                to={buildEssayUrl(sectionKey, essay.slug)}
                 className="group block bg-card rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
               >
                 {/* Cover Image */}
@@ -201,6 +200,16 @@ const GreenTransitionEssayListTemplate = () => {
               </p>
             )}
           </div>
+        )}
+
+        {/* Add Essay Modal */}
+        {isAdmin && sectionKey && (
+          <AddEssayModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            section={sectionKey}
+            onEssayCreated={handleEssayCreated}
+          />
         )}
 
       </main>

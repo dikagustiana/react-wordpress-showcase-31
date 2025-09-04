@@ -1,27 +1,35 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Clock, User, Calendar, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useGreenEssays } from '@/hooks/useGreenEssays';
 import { useAuthRole } from '@/hooks/useAuthRole';
 import { GreenTransitionInlineEditor } from '@/components/admin/GreenTransitionInlineEditor';
 import { supabase } from '@/integrations/supabase/client';
+import { SECTION_TITLES, buildSectionUrl, type SectionKey } from '@/constants/sections';
 import Header from './Header';
 import Footer from './Footer';
 
-const sectionTitles: Record<string, string> = {
-  'where-we-are-now': 'Where We Are Now',
-  'challenges-ahead': 'Challenges Ahead', 
-  'pathways-forward': 'Pathways Forward'
-};
-
 const GreenTransitionEssayDetailTemplate = () => {
   const { section, slug } = useParams<{ section: string; slug: string }>();
-  const { essays, loading, updateEssay, publishEssay, unpublishEssay } = useGreenEssays(section);
+  const [searchParams] = useSearchParams();
+  const { essays, loading, updateEssay, publishEssay, unpublishEssay } = useGreenEssays(section as SectionKey);
   const { isAdmin, user } = useAuthRole();
   const [isEditing, setIsEditing] = useState(false);
   
   const essay = essays.find(e => e.slug === slug);
-  const sectionTitle = sectionTitles[section || ''] || section;
+  const sectionKey = section as SectionKey;
+  const sectionTitle = SECTION_TITLES[sectionKey] || section;
+
+  // Check if edit mode should be enabled from query params
+  useEffect(() => {
+    if (searchParams.get('edit') === '1' && isAdmin && essay && !essay.id.startsWith('dummy-')) {
+      console.log('[Telemetry] edit_opened', { 
+        essayId: essay.id, 
+        timestamp: new Date().toISOString() 
+      });
+      setIsEditing(true);
+    }
+  }, [searchParams, isAdmin, essay]);
 
   // Auto-create essay if not found but section and slug exist (must be before any early returns)
   useEffect(() => {
@@ -160,7 +168,7 @@ const GreenTransitionEssayDetailTemplate = () => {
       <main className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button */}
         <Link 
-          to={`/green-transition/${section}`}
+          to={buildSectionUrl(sectionKey)}
           className="inline-flex items-center text-primary hover:text-primary/80 font-medium mb-8 transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
@@ -335,7 +343,7 @@ const GreenTransitionEssayDetailTemplate = () => {
         {/* Back to Index */}
         <div className="mt-12 text-center">
           <Link 
-            to={`/green-transition/${section}`}
+            to={buildSectionUrl(sectionKey)}
             className="inline-flex items-center bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors"
           >
             View More {sectionTitle} Essays

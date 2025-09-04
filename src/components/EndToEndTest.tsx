@@ -84,6 +84,8 @@ export const EndToEndTest: React.FC = () => {
       
       const testEssayResponse = await createEssayAPI({
         section: 'where-we-are-now',
+        title: 'End-to-End Test Essay',
+        author: user.email?.split('@')[0] || 'Test User',
         created_by: user.email
       });
 

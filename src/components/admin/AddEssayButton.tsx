@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 import { createEssayAPI, CreateEssayRequest } from '@/pages/api/essays';
 import { showError, showSuccess, logDiagnostic } from '@/utils/diagnostics';
 import { useToast } from '@/hooks/use-toast';
+import { SECTION_KEYS, isValidSectionKey, type SectionKey } from '@/constants/sections';
 
 interface AddEssayButtonProps {
-  section: string;
+  section: SectionKey;
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'default' | 'sm' | 'lg';
@@ -32,11 +33,11 @@ export const AddEssayButton: React.FC<AddEssayButtonProps> = ({
       return;
     }
 
-    // Validate before API call
-    if (!section) {
+    // Validate section
+    if (!isValidSectionKey(section)) {
       toast({
-        title: "Validation Error",
-        description: "Section is required to create an essay",
+        title: "Invalid Section",
+        description: "Invalid section key provided",
         variant: "destructive"
       });
       return;
@@ -48,6 +49,8 @@ export const AddEssayButton: React.FC<AddEssayButtonProps> = ({
     try {
       const request: CreateEssayRequest = {
         section,
+        title: 'Untitled Essay',
+        author: user.email.split('@')[0] || 'Editor',
         created_by: user.email
       };
 

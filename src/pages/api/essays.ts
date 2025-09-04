@@ -1,8 +1,13 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logDiagnostic, handleSupabaseError, showError, showSuccess } from '@/utils/diagnostics';
+import { SECTION_KEYS, isValidSectionKey, type SectionKey } from '@/constants/sections';
 
 export interface CreateEssayRequest {
-  section: string;
+  section: SectionKey;
+  title: string;
+  subtitle?: string;
+  author: string;
+  notes?: string;
   created_by: string;
 }
 
@@ -15,20 +20,77 @@ export interface CreateEssayResponse {
 }
 
 /**
+ * Slugify function to create URL-safe slugs
+ */
+const slugify = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/[\s_-]+/g, '-') // Replace spaces, underscores, hyphens with single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+};
+
+/**
+ * Generate unique slug by checking existing essays
+ */
+const generateUniqueSlug = async (baseSlug: string, section: SectionKey): Promise<string> => {
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from('green_essays')
+      .select('slug')
+      .eq('section', section)
+      .eq('slug', slug)
+      .single();
+
+    if (error && error.code === 'PGRST116') {
+      // No row found, slug is available
+      return slug;
+    }
+
+    if (error) {
+      // Other error, log and use original slug
+      console.warn('Error checking slug uniqueness:', error);
+      return slug;
+    }
+
+    // Slug exists, try with counter
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+
+    // Prevent infinite loop
+    if (counter > 100) {
+      return `${baseSlug}-${Date.now()}`;
+    }
+  }
+};
+
+/**
  * POST /api/essays - Create new essay endpoint (using service role for security)
- * Body: { section: string, created_by: string }
+ * Body: { section: SectionKey, title: string, subtitle?: string, author: string, notes?: string, created_by: string }
  */
 export async function createEssayAPI(request: CreateEssayRequest): Promise<CreateEssayResponse> {
   logDiagnostic('api_essays:create_start', { 
     section: request.section,
+    title: request.title,
     created_by: request.created_by 
   });
 
   try {
     // Validate input
-    if (!request.section || !request.created_by) {
-      const error = 'Missing required fields: section and created_by are required';
+    if (!request.section || !request.title || !request.created_by) {
+      const error = 'Missing required fields: section, title and created_by are required';
       logDiagnostic('api_essays:validation_failed', { request }, 'error');
+      return { success: false, error };
+    }
+
+    // Validate section key
+    if (!isValidSectionKey(request.section)) {
+      const error = `Invalid section: ${request.section}. Must be one of: ${Object.values(SECTION_KEYS).join(', ')}`;
+      logDiagnostic('api_essays:invalid_section', { section: request.section }, 'error');
       return { success: false, error };
     }
 
@@ -55,6 +117,16 @@ export async function createEssayAPI(request: CreateEssayRequest): Promise<Creat
       return { success: false, error: 'Not authorized - Admin or Editor role required' };
     }
 
+    // Generate unique slug from title
+    const baseSlug = slugify(request.title);
+    const slug = await generateUniqueSlug(baseSlug, request.section);
+
+    logDiagnostic('api_essays:slug_generated', { 
+      originalTitle: request.title,
+      baseSlug,
+      finalSlug: slug 
+    });
+
     // Get active template for section
     logDiagnostic('api_essays:fetching_template', { section: request.section });
     
@@ -71,19 +143,14 @@ export async function createEssayAPI(request: CreateEssayRequest): Promise<Creat
       }, 'warn');
     }
 
-    // Generate unique slug
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 7);
-    const slug = `untitled-essay-${randomStr}`;
-
-    // Prepare essay data with fallbacks
+    // Prepare essay data with proper defaults
     const essayData = {
       slug,
       section: request.section,
-      title: template?.title_template || 'New Essay',
-      subtitle: '', // Default empty subtitle
-      author_name: request.created_by.split('@')[0] || 'Editor',
-      cover_image_url: '', // Default empty, user can add later
+      title: request.title.trim(),
+      subtitle: request.subtitle?.trim() || '',
+      author_name: request.author.trim() || request.created_by.split('@')[0] || 'Editor',
+      cover_image_url: '/assets/placeholders/cover_default.webp',
       content_html: template?.content_html || '<h1>New Essay</h1><p>Start writing your essay here...</p>',
       content_json: template?.content_json || {
         type: 'doc',

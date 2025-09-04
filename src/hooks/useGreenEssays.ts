@@ -4,6 +4,7 @@ import { useAuthRole } from '@/hooks/useAuthRole';
 import { useToast } from '@/hooks/use-toast';
 import { dummyGreenEssays } from '@/data/dummyGreenEssays';
 import { handleSupabaseError, logDiagnostic, showSuccess, showError } from '@/utils/diagnostics';
+import { SECTION_KEYS, isValidSectionKey, type SectionKey } from '@/constants/sections';
 
 export interface GreenEssay {
   id: string;
@@ -36,7 +37,7 @@ export interface EssayVersion {
   created_at: string;
 }
 
-export const useGreenEssays = (section?: string) => {
+export const useGreenEssays = (section?: SectionKey) => {
   const [essays, setEssays] = useState<GreenEssay[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -116,7 +117,7 @@ export const useGreenEssays = (section?: string) => {
     }
   };
 
-  const createEssay = async (sectionName: string) => {
+  const createEssay = async (sectionName: SectionKey) => {
     if (!isAdmin || !user) return null;
 
     logDiagnostic('createEssay:start', { sectionName, userEmail: user.email });
