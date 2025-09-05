@@ -522,7 +522,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
       <FSLISidebar currentSlug={slug} />
       
       <main className="flex-1" style={{ marginLeft: '250px' }}>
-        <div className="max-w-content mx-auto px-6 py-8" style={{ paddingRight: '3rem' }}>
+        <div className="max-w-[700px] mx-auto px-6 py-8">
           <Breadcrumb 
             items={[
               { label: "Home", path: "/" },
@@ -532,14 +532,14 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
             ]} 
           />
           
-          <div className="bg-card rounded-lg p-8 shadow-sm border">
+          <article className="prose prose-lg max-w-none mt-12">
             {/* Header Section */}
             <div 
               data-editable 
-              className={`mb-8 ${editMode ? 'cursor-pointer' : ''}`}
+              className={`mb-12 ${editMode ? 'cursor-pointer' : ''}`}
               onClick={() => editMode && handlePageHeaderEdit()}
             >
-        <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
+              <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                 {canEdit && editMode && (
                   <EditButton 
                     onClick={(e) => {
@@ -551,62 +551,69 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                   />
                 )}
               </div>
-              <h1 className="text-h1 font-bold text-foreground mb-4">
+              
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
                 {page.title}
               </h1>
-              <h2 className="text-h2 text-muted-foreground mb-6">
-                {page.subtitle}
-              </h2>
               
-              {/* Financial Data */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                {metrics.map((metric) => (
-                  <div 
-                    key={metric.id} 
-                    data-editable 
-                    className={`bg-muted/50 p-4 rounded-lg ${editMode ? 'cursor-pointer' : ''}`}
-                    onClick={() => editMode && handleMetricEdit(metric)}
-                  >
-            <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
-                      {canEdit && editMode && (
-                        <EditButton 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log('[Editor] Edit metric clicked', metric.id);
-                            handleMetricEdit(metric);
-                          }} 
-                          variant="outline"
-                          className="bg-white shadow-sm"
-                        />
-                      )}
+              {page.subtitle && (
+                <h2 className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed font-normal">
+                  {page.subtitle}
+                </h2>
+              )}
+              
+              {page.notes_ref && (
+                <p className="text-sm italic text-muted-foreground mb-8">
+                  Notes Reference: {page.notes_ref}
+                </p>
+              )}
+              
+              {/* Financial Data - Clean grid without backgrounds */}
+              {metrics.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 py-6 border-y border-border/50">
+                  {metrics.map((metric) => (
+                    <div 
+                      key={metric.id} 
+                      data-editable 
+                      className={`text-center ${editMode ? 'cursor-pointer' : ''}`}
+                      onClick={() => editMode && handleMetricEdit(metric)}
+                    >
+                      <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
+                        {canEdit && editMode && (
+                          <EditButton 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log('[Editor] Edit metric clicked', metric.id);
+                              handleMetricEdit(metric);
+                            }} 
+                            variant="outline"
+                            className="bg-white shadow-sm"
+                          />
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wide">
+                        {metric.label}
+                      </p>
+                      <p className="text-3xl font-bold text-foreground mb-1">
+                        {formatValue(metric.value, metric.unit)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{metric.unit}</p>
                     </div>
-                    <h3 className="font-semibold text-foreground mb-2">{metric.label}</h3>
-                    <p className="text-2xl font-bold text-primary">
-                      {formatValue(metric.value, metric.unit)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{metric.unit}</p>
-                  </div>
-                ))}
-                
-                {page.notes_ref && (
-                  <div className="bg-primary/10 p-4 rounded-lg">
-                    <h3 className="font-semibold text-primary mb-2">Notes Reference</h3>
-                    <p className="text-foreground text-lg font-medium">{page.notes_ref}</p>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Content Sections */}
-            <div className="space-y-8">
+            <div className="space-y-12">
               {/* Quick Facts */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('quick_facts')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Quick Facts</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Quick Facts</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -621,34 +628,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('quick_facts') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('quick_facts')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('quick_facts')}
-                       isEditing={editingSection === getSection('quick_facts')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('quick_facts') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('quick_facts')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('quick_facts')}
+                      isEditing={editingSection === getSection('quick_facts')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Definition */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('definition')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Definition</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Definition</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -663,34 +675,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('definition') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('definition')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('definition')}
-                       isEditing={editingSection === getSection('definition')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('definition') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('definition')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('definition')}
+                      isEditing={editingSection === getSection('definition')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Recognition */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('recognition')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Recognition</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Recognition</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -705,34 +722,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('recognition') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('recognition')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('recognition')}
-                       isEditing={editingSection === getSection('recognition')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('recognition') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('recognition')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('recognition')}
+                      isEditing={editingSection === getSection('recognition')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Measurement */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('measurement')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Measurement</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Measurement</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -747,34 +769,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('measurement') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('measurement')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('measurement')}
-                       isEditing={editingSection === getSection('measurement')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('measurement') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('measurement')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('measurement')}
+                      isEditing={editingSection === getSection('measurement')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Presentation Example */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('presentation_example')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Presentation Example</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Presentation Example</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -789,34 +816,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('presentation_example') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('presentation_example')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('presentation_example')}
-                       isEditing={editingSection === getSection('presentation_example')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('presentation_example') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('presentation_example')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('presentation_example')}
+                      isEditing={editingSection === getSection('presentation_example')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Journal Entry Examples */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('journal_entry_examples')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Journal Entry Examples</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Journal Entry Examples</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -831,34 +863,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('journal_entry_examples') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('journal_entry_examples')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('journal_entry_examples')}
-                       isEditing={editingSection === getSection('journal_entry_examples')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('journal_entry_examples') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('journal_entry_examples')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('journal_entry_examples')}
+                      isEditing={editingSection === getSection('journal_entry_examples')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Disclosure Items */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('disclosure_items')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Disclosure Items</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Disclosure Items</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -873,34 +910,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('disclosure_items') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('disclosure_items')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('disclosure_items')}
-                       isEditing={editingSection === getSection('disclosure_items')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('disclosure_items') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('disclosure_items')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('disclosure_items')}
+                      isEditing={editingSection === getSection('disclosure_items')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Common Mistakes */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('common_mistakes')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Common Mistakes</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Common Mistakes</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -915,34 +957,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('common_mistakes') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('common_mistakes')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('common_mistakes')}
-                       isEditing={editingSection === getSection('common_mistakes')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('common_mistakes') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('common_mistakes')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('common_mistakes')}
+                      isEditing={editingSection === getSection('common_mistakes')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* TODO Essay */}
               <section 
                 data-editable 
-                className={`border-b border-border pb-6 last:border-b-0 ${editMode ? 'cursor-pointer' : ''}`}
+                className={`${editMode ? 'cursor-pointer' : ''}`}
                 onClick={() => editMode && handleSectionEdit('todo_essay')}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">TODO Essay</h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">TODO Essay</h2>
                   <div className="edit-handle" style={{ zIndex: 80, pointerEvents: 'auto' }}>
                     {canEdit && editMode && (
                       <EditButton 
@@ -957,35 +1004,40 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                     )}
                   </div>
                 </div>
-                 <div className="bg-muted/30 p-6 rounded-lg min-h-[120px]">
-                   {!sectionExists('todo_essay') ? (
-                     <div className="flex items-center justify-center h-24 text-muted-foreground">
-                       <Button 
-                         variant="outline" 
-                         onClick={() => handleCreateSection('todo_essay')}
-                         className="text-sm"
-                       >
-                         No content yet — Create section
-                       </Button>
-                     </div>
-                   ) : (
-                     <EssayAutoResize 
-                       content={getSectionContent('todo_essay')}
-                       isEditing={editingSection === getSection('todo_essay')?.id}
-                     />
-                   )}
-                 </div>
+                <div className="leading-relaxed">
+                  {!sectionExists('todo_essay') ? (
+                    <div className="text-muted-foreground italic py-8 text-center">
+                      {editMode ? (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleCreateSection('todo_essay')}
+                          className="text-sm"
+                        >
+                          No content yet — Create section
+                        </Button>
+                      ) : (
+                        <p>This section is being developed.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <EssayAutoResize 
+                      content={getSectionContent('todo_essay')}
+                      isEditing={editingSection === getSection('todo_essay')?.id}
+                    />
+                  )}
+                </div>
+                <hr className="mt-12 border-border/30" />
               </section>
 
               {/* Embeds Section */}
-              <section className="border-b border-border pb-6 last:border-b-0">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-h3 font-semibold text-foreground">Resources</h3>
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-semibold text-foreground">Resources</h2>
                 </div>
                 <EmbedManager pageSlug={slug} />
               </section>
             </div>
-          </div>
+          </article>
         </div>
       </main>
 
