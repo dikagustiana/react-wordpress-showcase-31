@@ -124,6 +124,117 @@ export type Database = {
           },
         ]
       }
+      fsli_inline_assets: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          file_name: string
+          id: string
+          mime_type: string
+          page_key: string
+          size_bytes: number
+          storage_path: string
+          uploaded_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          file_name: string
+          id?: string
+          mime_type: string
+          page_key: string
+          size_bytes: number
+          storage_path: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          file_name?: string
+          id?: string
+          mime_type?: string
+          page_key?: string
+          size_bytes?: number
+          storage_path?: string
+          uploaded_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      fsli_inline_embeds: {
+        Row: {
+          embed_type: string
+          embed_url: string | null
+          height_px: number | null
+          id: string
+          meta: Json | null
+          page_key: string
+          provider: string | null
+          range_ref: string | null
+          section_key: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          embed_type: string
+          embed_url?: string | null
+          height_px?: number | null
+          id?: string
+          meta?: Json | null
+          page_key: string
+          provider?: string | null
+          range_ref?: string | null
+          section_key: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          embed_type?: string
+          embed_url?: string | null
+          height_px?: number | null
+          id?: string
+          meta?: Json | null
+          page_key?: string
+          provider?: string | null
+          range_ref?: string | null
+          section_key?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fsli_inline_sections: {
+        Row: {
+          content_html: string
+          id: string
+          page_key: string
+          section_key: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          content_html?: string
+          id?: string
+          page_key: string
+          section_key: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          content_html?: string
+          id?: string
+          page_key?: string
+          section_key?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
       fsli_metrics: {
         Row: {
           id: string
