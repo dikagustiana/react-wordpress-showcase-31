@@ -9,6 +9,15 @@ import { useRole } from '@/contexts/RoleContext';
 import { useToast } from '@/hooks/use-toast';
 import { normalizeSlug } from '@/hooks/useContent';
 import { supabase } from '@/integrations/supabase/client';
+import { TOCManager } from '@/components/fsli/TOCManager';
+import { ReadingProgressBar } from '@/components/fsli/ReadingProgressBar';
+import { SectionH2 } from '@/components/fsli/SectionH2';
+import { CalloutBox } from '@/components/fsli/CalloutBox';
+import { IssueCard } from '@/components/fsli/IssueCard';
+import { JournalTable } from '@/components/fsli/JournalTable';
+import { StepperComponent } from '@/components/fsli/StepperComponent';
+import { BackToTop } from '@/components/fsli/BackToTop';
+import { useScrollSpy } from '@/hooks/useScrollSpy';
 
 interface DynamicFSLITemplateProps {
   slug: string;
@@ -29,14 +38,34 @@ interface MetricData {
   unit?: string;
 }
 
+interface SectionData {
+  id: string;
+  title: string;
+  group: string;
+  intro?: string;
+  body?: string;
+  takeaways?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+  blocks?: {
+    type: 'callout' | 'issueCards' | 'journalTable' | 'stepper';
+    data: any;
+  }[];
+}
+
 export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }) => {
   const { isAdmin } = useRole();
   const { toast } = useToast();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [metrics, setMetrics] = useState<MetricData[]>([]);
+  const [sections, setSections] = useState<SectionData[]>([]);
   const [loading, setLoading] = useState(true);
   
   const pageKey = normalizeSlug(slug);
+  
+  // Generate section IDs for scrollspy
+  const sectionIds = sections.map(section => section.id);
+  const activeId = useScrollSpy(sectionIds);
 
   // Load page data and metrics from existing FSLI tables
   useEffect(() => {
@@ -65,6 +94,80 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
           if (metricsResult) {
             setMetrics(metricsResult);
           }
+
+          // Generate default sections structure
+          const defaultSections: SectionData[] = [
+            {
+              id: 'definition',
+              title: 'Definition',
+              group: 'Fundamentals',
+              collapsible: false
+            },
+            {
+              id: 'recognition',
+              title: 'Recognition Criteria',
+              group: 'Fundamentals',
+              collapsible: false
+            },
+            {
+              id: 'measurement',
+              title: 'Measurement Principles',
+              group: 'Fundamentals',
+              collapsible: false
+            },
+            {
+              id: 'implementation-steps',
+              title: 'Implementation Steps',
+              group: 'Implementation',
+              collapsible: true,
+              defaultCollapsed: window.innerWidth < 768,
+              blocks: [{
+                type: 'stepper',
+                data: []
+              }]
+            },
+            {
+              id: 'common-issues',
+              title: 'Common Implementation Issues',
+              group: 'Issues',
+              collapsible: true,
+              defaultCollapsed: window.innerWidth < 768,
+              blocks: [{
+                type: 'issueCards',
+                data: []
+              }]
+            },
+            {
+              id: 'practical-examples',
+              title: 'Practical Examples',
+              group: 'Examples',
+              collapsible: false
+            },
+            {
+              id: 'journal-entries',
+              title: 'Journal Entry Examples',
+              group: 'Examples',
+              collapsible: false,
+              blocks: [{
+                type: 'journalTable',
+                data: []
+              }]
+            },
+            {
+              id: 'disclosure-requirements',
+              title: 'Disclosure Requirements',
+              group: 'Disclosures',
+              collapsible: false
+            },
+            {
+              id: 'financial-statement-examples',
+              title: 'Financial Statement Examples',
+              group: 'Disclosures',
+              collapsible: false
+            }
+          ];
+          
+          setSections(defaultSections);
         }
       } catch (error) {
         console.error('Error loading page data:', error);
@@ -94,6 +197,72 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
     }
     
     return new Intl.NumberFormat('en-US').format(value);
+  };
+
+  const handleSectionClick = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 96;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const renderSectionBlocks = (section: SectionData) => {
+    if (!section.blocks) return null;
+
+    return (
+      <div className="space-y-6">
+        {section.blocks.map((block, index) => {
+          const blockId = `${section.id}_block_${index}`;
+          
+          switch (block.type) {
+            case 'callout':
+              return (
+                <CalloutBox
+                  key={blockId}
+                  id={blockId}
+                  pageKey={pageKey}
+                  variant={block.data?.variant || 'info'}
+                  copiable={block.data?.copiable || false}
+                />
+              );
+            case 'issueCards':
+              return (
+                <IssueCard
+                  key={blockId}
+                  id={blockId}
+                  pageKey={pageKey}
+                  items={block.data?.items || []}
+                />
+              );
+            case 'journalTable':
+              return (
+                <JournalTable
+                  key={blockId}
+                  id={blockId}
+                  pageKey={pageKey}
+                  entries={block.data?.entries || []}
+                />
+              );
+            case 'stepper':
+              return (
+                <StepperComponent
+                  key={blockId}
+                  id={blockId}
+                  pageKey={pageKey}
+                  steps={block.data?.steps || []}
+                />
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
   };
 
   if (loading) {
@@ -140,15 +309,16 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
+      <ReadingProgressBar />
       
-      <main className="flex-1 flex">
+      <main className="flex-1 flex relative">
         {/* Left Sidebar */}
         <div className="w-64 bg-muted/30 border-r border-border">
           <FSLISidebar />
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center relative">
           <div className="w-full max-w-[700px] px-8 py-12">
             {/* Breadcrumb */}
             <div className="mb-8">
@@ -182,13 +352,13 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               )}
             </header>
 
-            {/* Quick Facts Section */}
+            {/* Key Points Section */}
             <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Quick Facts</h2>
+              <h2 className="text-2xl font-semibold mb-6">Key Points</h2>
               
               {/* Display existing metrics */}
               {metrics.length > 0 && (
-                <div className="space-y-4 mb-6">
+                <div className="space-y-4 mb-6 p-4 bg-accent/5 border border-accent/20 rounded-lg">
                   {metrics.map(metric => (
                     <div key={metric.id} className="flex justify-between items-center py-2">
                       <span className="font-medium">{metric.label}</span>
@@ -202,98 +372,54 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
 
               <InlineEditor
                 pageKey={pageKey}
-                sectionKey="quick_facts"
-                placeholder="Add quick facts and key information here..."
+                sectionKey="key_points"
+                placeholder="Add key points and essential information here..."
                 className="prose max-w-none"
               />
+            </section>
+
+            {/* Dynamic Sections */}
+            {sections.map((section, index) => {
+              const prevSection = index > 0 ? sections[index - 1] : undefined;
+              const nextSection = index < sections.length - 1 ? sections[index + 1] : undefined;
               
-              <hr className="mt-8 border-border" />
-            </section>
+              return (
+                <SectionH2
+                  key={section.id}
+                  id={section.id}
+                  pageKey={pageKey}
+                  title={section.title}
+                  collapsible={section.collapsible}
+                  defaultCollapsed={section.defaultCollapsed}
+                  prevSection={prevSection ? { id: prevSection.id, title: prevSection.title } : undefined}
+                  nextSection={nextSection ? { id: nextSection.id, title: nextSection.title } : undefined}
+                >
+                  {renderSectionBlocks(section)}
+                </SectionH2>
+              );
+            })}
+          </div>
 
-            {/* Definition Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Definition</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="definition"
-                placeholder="Provide a clear definition and explanation..."
-                className="prose max-w-none leading-relaxed"
-              />
-              <hr className="mt-8 border-border" />
-            </section>
-
-            {/* Recognition Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Recognition</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="recognition"
-                placeholder="Explain recognition criteria and principles..."
-                className="prose max-w-none leading-relaxed"
-              />
-              <hr className="mt-8 border-border" />
-            </section>
-
-            {/* Measurement Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Measurement</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="measurement"
-                placeholder="Detail measurement methods and approaches..."
-                className="prose max-w-none leading-relaxed"
-              />
-              <hr className="mt-8 border-border" />
-            </section>
-
-            {/* Presentation & Example Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Presentation & Example</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="presentation_example"
-                placeholder="Show presentation formats and provide examples..."
-                className="prose max-w-none leading-relaxed"
-              />
-              <hr className="mt-8 border-border" />
-            </section>
-
-            {/* Journal Entry Examples */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Journal Entry Examples</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="journal_entry_examples"
-                placeholder="Provide journal entry examples and explanations..."
-                className="prose max-w-none leading-relaxed"
-              />
-              <hr className="mt-8 border-border" />
-            </section>
-
-            {/* Disclosure Items */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Disclosure Items</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="disclosure_items"
-                placeholder="List required disclosure items and requirements..."
-                className="prose max-w-none leading-relaxed"
-              />
-              <hr className="mt-8 border-border" />
-            </section>
-
-            {/* Common Mistakes */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Common Mistakes</h2>
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="common_mistakes"
-                placeholder="Highlight common mistakes and how to avoid them..."
-                className="prose max-w-none leading-relaxed"
-              />
-            </section>
+          {/* Right Sidebar - TOC */}
+          <div className="hidden lg:block w-80 p-8">
+            <TOCManager
+              sections={sections}
+              activeId={activeId}
+              onSectionClick={handleSectionClick}
+            />
           </div>
         </div>
+
+        {/* Mobile TOC */}
+        <TOCManager
+          sections={sections}
+          activeId={activeId}
+          onSectionClick={handleSectionClick}
+          className="lg:hidden"
+        />
+
+        {/* Back to Top */}
+        <BackToTop />
       </main>
 
       <Footer />
