@@ -11,29 +11,40 @@ export const useAuthRole = () => {
   const [loading, setLoading] = useState(true);
 
   const readRoleFromUser = (u: User | null): Role => {
-    const r = (u?.app_metadata as any)?.role;
-    return r === 'admin' || r === 'viewer' ? r : null;
+    try {
+      const r = (u?.app_metadata as any)?.role;
+      return r === 'admin' || r === 'viewer' ? r : null;
+    } catch (error) {
+      console.error('Error reading role from user:', error);
+      return null;
+    }
   };
 
   const resolveRole = async (sess: Session | null) => {
-    const immediate = readRoleFromUser(sess?.user ?? null);
-    if (immediate) {
-      setRole(immediate);
-      setLoading(false);
-      return;
-    }
-    if (sess?.user) {
-      try {
-        const { data, error } = await supabase.rpc('get_user_role');
-        if (error) throw error;
-        setRole((data as 'admin' | 'viewer') ?? 'viewer');
-      } catch {
-        setRole('viewer');
+    try {
+      const immediate = readRoleFromUser(sess?.user ?? null);
+      if (immediate) {
+        setRole(immediate);
+        setLoading(false);
+        return;
       }
-    } else {
+      if (sess?.user) {
+        try {
+          const { data, error } = await supabase.rpc('get_user_role');
+          if (error) throw error;
+          setRole((data as 'admin' | 'viewer') ?? 'viewer');
+        } catch {
+          setRole('viewer');
+        }
+      } else {
+        setRole(null);
+      }
+    } catch (error) {
+      console.error('Error resolving role:', error);
       setRole(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {

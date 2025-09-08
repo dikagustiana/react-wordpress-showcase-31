@@ -7,6 +7,7 @@ import { WarningBanner } from '@/components/WarningBanner';
 import { SupabaseEnvBanner } from '@/components/SupabaseEnvBanner';
 import { RoleProvider } from '@/contexts/RoleContext';
 import { EditModeProvider } from '@/contexts/EditModeContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Pages
 import Index from "./pages/Index";
@@ -75,16 +76,17 @@ const FSLIDetail = ({ slug }: { slug: string }) => <DynamicFSLITemplate slug={sl
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <RoleProvider>
-      <EditModeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <SupabaseEnvBanner />
-            <WarningBanner />
-            <Routes>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <RoleProvider>
+        <EditModeProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SupabaseEnvBanner />
+              <WarningBanner />
+              <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />
           <Route path="/critical-thinking-research/:phase" element={<EssayListTemplate />} />
@@ -174,12 +176,13 @@ const App = () => (
           <Route path="/model/test" element={<TestSuite />} />
           
           <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </EditModeProvider>
-    </RoleProvider>
-  </QueryClientProvider>
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </EditModeProvider>
+      </RoleProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
