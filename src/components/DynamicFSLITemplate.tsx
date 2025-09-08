@@ -54,11 +54,21 @@ interface SectionData {
 }
 
 export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }) => {
+  console.log('DynamicFSLITemplate: slug=', slug);
+  
   const { isAdmin } = useRole();
   const { toast } = useToast();
+  
+  console.log('DynamicFSLITemplate: About to call useState for pageData');
   const [pageData, setPageData] = useState<PageData | null>(null);
+  
+  console.log('DynamicFSLITemplate: About to call useState for metrics');  
   const [metrics, setMetrics] = useState<MetricData[]>([]);
+  
+  console.log('DynamicFSLITemplate: About to call useState for sections');
   const [sections, setSections] = useState<SectionData[]>([]);
+  
+  console.log('DynamicFSLITemplate: About to call useState for loading');
   const [loading, setLoading] = useState(true);
   
   const pageKey = normalizeSlug(slug);

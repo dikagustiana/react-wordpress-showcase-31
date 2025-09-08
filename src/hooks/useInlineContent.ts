@@ -40,11 +40,24 @@ interface InlineAsset {
 }
 
 export const useInlineContent = (pageKey: string) => {
+  console.log('useInlineContent: pageKey=', pageKey);
+  
+  console.log('useInlineContent: About to call useState for sections');
   const [sections, setSections] = useState<InlineSection[]>([]);
+  
+  console.log('useInlineContent: About to call useState for embeds');
   const [embeds, setEmbeds] = useState<InlineEmbed[]>([]);
+  
+  console.log('useInlineContent: About to call useState for assets');  
   const [assets, setAssets] = useState<InlineAsset[]>([]);
+  
+  console.log('useInlineContent: About to call useState for loading');
   const [loading, setLoading] = useState(true);
+  
+  console.log('useInlineContent: About to call useState for saving');
   const [saving, setSaving] = useState(false);
+  
+  console.log('useInlineContent: About to call useToast');
   const { toast } = useToast();
 
   // Load initial content

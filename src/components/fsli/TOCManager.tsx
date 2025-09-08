@@ -32,8 +32,14 @@ export const TOCManager: React.FC<TOCManagerProps> = ({
   onReorder,
   className = ""
 }) => {
+  console.log('TOCManager: sections=', sections, 'activeId=', activeId);
+  
   const { isAdmin } = useRole();
+  
+  console.log('TOCManager: About to call useState for groups');
   const [groups, setGroups] = useState<TOCGroup[]>([]);
+  
+  console.log('TOCManager: About to call useState for isVisible');
   const [isVisible, setIsVisible] = useState(false);
 
   // Generate TOC from sections
