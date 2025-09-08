@@ -40,6 +40,22 @@ interface InlineAsset {
 }
 
 export const useInlineContent = (pageKey: string) => {
+  // Add validation for pageKey to prevent React errors
+  if (!pageKey || typeof pageKey !== 'string') {
+    console.warn('useInlineContent: invalid pageKey provided:', pageKey);
+    return {
+      sections: [],
+      embeds: [],
+      assets: [],
+      loading: false,
+      saving: false,
+      getSectionContent: () => '',
+      saveSectionContent: async () => false,
+      uploadFile: async () => null,
+      createEmbed: async () => false
+    };
+  }
+
   const [sections, setSections] = useState<InlineSection[]>([]);
   const [embeds, setEmbeds] = useState<InlineEmbed[]>([]);
   const [assets, setAssets] = useState<InlineAsset[]>([]);

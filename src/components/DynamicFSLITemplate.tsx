@@ -61,6 +61,25 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   const [sections, setSections] = useState<SectionData[]>([]);
   const [loading, setLoading] = useState(true);
   
+  // Add validation for slug to prevent React errors
+  if (!slug || typeof slug !== 'string') {
+    console.error('DynamicFSLITemplate: invalid slug provided:', slug);
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <main className="flex-1 flex">
+          <div className="flex-1 p-8">
+            <div className="text-center py-12">
+              <h1 className="text-2xl font-bold text-muted-foreground">Invalid Page</h1>
+              <p className="text-muted-foreground mt-2">No page slug provided.</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
   const pageKey = normalizeSlug(slug);
   
   // Generate section IDs for scrollspy
