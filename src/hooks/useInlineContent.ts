@@ -40,8 +40,6 @@ interface InlineAsset {
 }
 
 export const useInlineContent = (pageKey: string) => {
-  console.log('useInlineContent: Starting with pageKey:', pageKey);
-  
   const [sections, setSections] = useState<InlineSection[]>([]);
   const [embeds, setEmbeds] = useState<InlineEmbed[]>([]);
   const [assets, setAssets] = useState<InlineAsset[]>([]);
@@ -78,7 +76,7 @@ export const useInlineContent = (pageKey: string) => {
     if (pageKey) {
       loadContent();
     }
-  }, [pageKey, toast]);
+  }, [pageKey]); // Removed toast from dependency array
 
   // Get section content
   const getSectionContent = useCallback((sectionKey: string): string => {
