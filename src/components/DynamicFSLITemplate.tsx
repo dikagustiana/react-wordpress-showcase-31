@@ -120,7 +120,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               title: 'Implementation Steps',
               group: 'Implementation',
               collapsible: true,
-              defaultCollapsed: window.innerWidth < 768,
+              defaultCollapsed: typeof window !== 'undefined' ? window.innerWidth < 768 : true,
               blocks: [{
                 type: 'stepper',
                 data: []
@@ -131,7 +131,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               title: 'Common Implementation Issues',
               group: 'Issues',
               collapsible: true,
-              defaultCollapsed: window.innerWidth < 768,
+              defaultCollapsed: typeof window !== 'undefined' ? window.innerWidth < 768 : true,
               blocks: [{
                 type: 'issueCards',
                 data: []
