@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 
 // Normalize slug - handle both hyphen and underscore formats  
 export const normalizeSlug = (s: string): string => {
-  return s.toLowerCase().trim();
+  return s.toLowerCase().trim().replace(/_/g, '-');
 };
 
 export interface FSLIPage {

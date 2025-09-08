@@ -98,7 +98,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
           .from('fsli_pages')
           .select('*')
           .eq('slug', normalizedSlug)
-          .single();
+          .maybeSingle();
 
         if (pageResult) {
           setPageData(pageResult);

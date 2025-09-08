@@ -120,15 +120,15 @@ const App = () => (
           <Route path="/embed-example" element={<EmbedExample />} />
           
           {/* FSLI Detail Routes - Using DynamicFSLITemplate */}
-          <Route path="/accounting/fsli/cash-and-cash-equivalents" element={<FSLIDetail slug="cash_and_cash_equivalents" />} />
-          <Route path="/accounting/fsli/restricted-cash" element={<FSLIDetail slug="restricted_cash" />} />
-          <Route path="/accounting/fsli/trade-receivables-net" element={<FSLIDetail slug="trade_receivables_net" />} />
-          <Route path="/accounting/fsli/third-parties" element={<FSLIDetail slug="third_parties" />} />
-          <Route path="/accounting/fsli/related-parties" element={<FSLIDetail slug="related_parties" />} />
-          <Route path="/accounting/fsli/other-receivables-net" element={<FSLIDetail slug="other_receivables_net" />} />
-          <Route path="/accounting/fsli/due-from-government" element={<FSLIDetail slug="due_from_government" />} />
-          <Route path="/accounting/fsli/inventories-net" element={<FSLIDetail slug="inventories_net" />} />
-          <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-current" element={<FSLIDetail slug="corporate_dividend_taxes_receivable_current" />} />
+          <Route path="/accounting/fsli/cash-and-cash-equivalents" element={<FSLIDetail slug="cash-and-cash-equivalents" />} />
+          <Route path="/accounting/fsli/restricted-cash" element={<FSLIDetail slug="restricted-cash" />} />
+          <Route path="/accounting/fsli/trade-receivables-net" element={<FSLIDetail slug="trade-receivables-net" />} />
+          <Route path="/accounting/fsli/third-parties" element={<FSLIDetail slug="third-parties" />} />
+          <Route path="/accounting/fsli/related-parties" element={<FSLIDetail slug="related-parties" />} />
+          <Route path="/accounting/fsli/other-receivables-net" element={<FSLIDetail slug="other-receivables-net" />} />
+          <Route path="/accounting/fsli/due-from-government" element={<FSLIDetail slug="due-from-government" />} />
+          <Route path="/accounting/fsli/inventories-net" element={<FSLIDetail slug="inventories-net" />} />
+          <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-current" element={<FSLIDetail slug="corporate-dividend-taxes-receivable-current" />} />
           <Route path="/accounting/fsli/advances-prepayments-current" element={<FSLIDetail slug="advances_prepayments_current" />} />
           <Route path="/accounting/fsli/other-current-assets" element={<FSLIDetail slug="other_current_assets" />} />
           <Route path="/accounting/fsli/other-non-current-assets" element={<FSLIDetail slug="other_non_current_assets" />} />
