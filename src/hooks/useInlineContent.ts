@@ -40,6 +40,8 @@ interface InlineAsset {
 }
 
 export const useInlineContent = (pageKey: string) => {
+  console.log('useInlineContent: Starting with pageKey:', pageKey);
+  
   const [sections, setSections] = useState<InlineSection[]>([]);
   const [embeds, setEmbeds] = useState<InlineEmbed[]>([]);
   const [assets, setAssets] = useState<InlineAsset[]>([]);

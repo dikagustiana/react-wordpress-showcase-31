@@ -4,6 +4,8 @@ export const useScrollSpy = (sectionIds: string[], options?: {
   threshold?: number;
   rootMargin?: string;
 }) => {
+  console.log('useScrollSpy: Starting with sectionIds:', sectionIds);
+  
   const [activeId, setActiveId] = useState<string>('');
   const threshold = options?.threshold || 0.35;
 

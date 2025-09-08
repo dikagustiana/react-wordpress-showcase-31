@@ -54,6 +54,8 @@ interface SectionData {
 }
 
 export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }) => {
+  console.log('DynamicFSLITemplate: Starting with slug:', slug);
+  
   const { isAdmin } = useRole();
   const { toast } = useToast();
   const [pageData, setPageData] = useState<PageData | null>(null);
@@ -62,9 +64,12 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   const [loading, setLoading] = useState(true);
   
   const pageKey = normalizeSlug(slug);
+  console.log('DynamicFSLITemplate: pageKey:', pageKey);
   
   // Generate section IDs for scrollspy
-  const sectionIds = sections.map(section => section.id);
+  const sectionIds = sections.map(section => section?.id).filter(Boolean);
+  console.log('DynamicFSLITemplate: sectionIds:', sectionIds);
+  
   const activeId = useScrollSpy(sectionIds);
 
   // Load page data and metrics from existing FSLI tables
