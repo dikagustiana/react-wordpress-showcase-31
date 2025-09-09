@@ -238,6 +238,9 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
         {section.blocks.map((block, index) => {
           const blockId = `${section.id}_block_${index}`;
           
+          // Debug logging to catch null/undefined issues
+          console.log('Rendering block:', { blockId, type: block.type, data: block.data });
+          
           switch (block.type) {
             case 'callout':
               return (
@@ -264,7 +267,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                   key={blockId}
                   id={blockId}
                   pageKey={pageKey}
-                  entries={block.data?.entries || []}
+                  entries={Array.isArray(block.data?.entries) ? block.data.entries : []}
                 />
               );
             case 'stepper':

@@ -26,12 +26,14 @@ interface JournalTableProps {
 export const JournalTable: React.FC<JournalTableProps> = ({
   id,
   pageKey,
-  entries = [],
+  entries,
   onEntriesChange,
   className = ""
 }) => {
   const { isAdmin } = useRole();
-  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(entries);
+  // Ensure entries is always an array to prevent React crash
+  const safeEntries = Array.isArray(entries) ? entries : [];
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(safeEntries);
   const [isDense, setIsDense] = useState(false);
 
   const addEntry = () => {
