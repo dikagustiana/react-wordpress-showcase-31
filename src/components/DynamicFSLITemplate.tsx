@@ -284,40 +284,30 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
     );
   };
 
-  if (loading) {
+  // Combine loading and null safety checks
+  if (loading || !pageData) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Header />
         <main className="flex-1 flex">
           <FSLISidebar />
           <div className="flex-1 p-8">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-muted rounded w-1/3"></div>
-              <div className="h-4 bg-muted rounded w-1/2"></div>
-              <div className="space-y-3 mt-8">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-16 bg-muted rounded"></div>
-                ))}
+            {loading ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-8 bg-muted rounded w-1/3"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="space-y-3 mt-8">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="h-16 bg-muted rounded"></div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!pageData) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Header />
-        <main className="flex-1 flex">
-          <FSLISidebar />
-          <div className="flex-1 p-8">
-            <div className="text-center py-12">
-              <h1 className="text-2xl font-bold text-muted-foreground">Page not found</h1>
-              <p className="text-muted-foreground mt-2">The requested FSLI page could not be found.</p>
-            </div>
+            ) : (
+              <div className="text-center py-12">
+                <h1 className="text-2xl font-bold text-muted-foreground">Page not found</h1>
+                <p className="text-muted-foreground mt-2">The requested FSLI page could not be found.</p>
+              </div>
+            )}
           </div>
         </main>
         <Footer />
@@ -344,7 +334,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <Breadcrumb items={[
                 { label: 'Accounting', path: '/accounting' },
                 { label: 'FSLI', path: '/accounting/fsli' },
-                { label: pageData.title }
+                { label: pageData?.title || 'Loading...' }
               ]} />
             </div>
 
@@ -364,7 +354,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                 className="text-xl text-muted-foreground mb-6"
               />
               
-              {pageData.notes_ref && (
+              {pageData?.notes_ref && (
                 <div className="text-sm italic text-muted-foreground border-l-4 border-primary/20 pl-4 mb-6">
                   Notes Reference: {pageData.notes_ref}
                 </div>
@@ -376,13 +366,13 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
               <h2 className="text-2xl font-semibold mb-6">Key Points</h2>
               
               {/* Display existing metrics */}
-              {metrics.length > 0 && (
+              {metrics?.length > 0 && (
                 <div className="space-y-4 mb-6 p-4 bg-accent/5 border border-accent/20 rounded-lg">
                   {metrics.map(metric => (
-                    <div key={metric.id} className="flex justify-between items-center py-2">
-                      <span className="font-medium">{metric.label}</span>
+                    <div key={metric?.id} className="flex justify-between items-center py-2">
+                      <span className="font-medium">{metric?.label}</span>
                       <span className="text-muted-foreground">
-                        {formatMetricValue(metric.value, metric.unit)}
+                        {formatMetricValue(metric?.value, metric?.unit)}
                       </span>
                     </div>
                   ))}
@@ -398,7 +388,9 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
             </section>
 
             {/* Dynamic Sections */}
-            {sections.map((section, index) => {
+            {sections?.map((section, index) => {
+              if (!section?.id) return null;
+              
               const prevSection = index > 0 ? sections[index - 1] : undefined;
               const nextSection = index < sections.length - 1 ? sections[index + 1] : undefined;
               
@@ -407,11 +399,11 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                   key={section.id}
                   id={section.id}
                   pageKey={pageKey}
-                  title={section.title}
-                  collapsible={section.collapsible}
-                  defaultCollapsed={section.defaultCollapsed}
-                  prevSection={prevSection ? { id: prevSection.id, title: prevSection.title } : undefined}
-                  nextSection={nextSection ? { id: nextSection.id, title: nextSection.title } : undefined}
+                  title={section?.title || 'Untitled Section'}
+                  collapsible={section?.collapsible}
+                  defaultCollapsed={section?.defaultCollapsed}
+                  prevSection={prevSection ? { id: prevSection?.id, title: prevSection?.title } : undefined}
+                  nextSection={nextSection ? { id: nextSection?.id, title: nextSection?.title } : undefined}
                 >
                   {renderSectionBlocks(section)}
                 </SectionH2>
@@ -422,7 +414,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
           {/* Right Sidebar - TOC */}
           <div className="hidden lg:block w-80 p-8">
             <TOCManager
-              sections={sections}
+              sections={sections || []}
               activeId={activeId}
               onSectionClick={handleSectionClick}
             />
@@ -431,7 +423,7 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
 
         {/* Mobile TOC */}
         <TOCManager
-          sections={sections}
+          sections={sections || []}
           activeId={activeId}
           onSectionClick={handleSectionClick}
           className="lg:hidden"

@@ -70,8 +70,12 @@ import ForecastingOutput from "./pages/forecasting/Output";
 // Import DynamicFSLITemplate for admin editing
 import { DynamicFSLITemplate } from "@/components/DynamicFSLITemplate";
 
-// FSLI Detail component using dynamic template
-const FSLIDetail = ({ slug }: { slug: string }) => <DynamicFSLITemplate slug={slug} />;
+// FSLI Detail component using dynamic template with error boundary
+const FSLIDetail = ({ slug }: { slug: string }) => (
+  <ErrorBoundary>
+    <DynamicFSLITemplate slug={slug} />
+  </ErrorBoundary>
+);
 
 const queryClient = new QueryClient();
 
