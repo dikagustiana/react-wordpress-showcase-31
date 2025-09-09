@@ -129,9 +129,9 @@ const App = () => (
           <Route path="/accounting/fsli/due-from-government" element={<FSLIDetail slug="due-from-government" />} />
           <Route path="/accounting/fsli/inventories-net" element={<FSLIDetail slug="inventories-net" />} />
           <Route path="/accounting/fsli/corporate-dividend-taxes-receivable-current" element={<FSLIDetail slug="corporate-dividend-taxes-receivable-current" />} />
-          <Route path="/accounting/fsli/advances-prepayments-current" element={<FSLIDetail slug="advances_prepayments_current" />} />
-          <Route path="/accounting/fsli/other-current-assets" element={<FSLIDetail slug="other_current_assets" />} />
-          <Route path="/accounting/fsli/other-non-current-assets" element={<FSLIDetail slug="other_non_current_assets" />} />
+          <Route path="/accounting/fsli/advances-prepayments-current" element={<FSLIDetail slug="advances-prepayments-current" />} />
+          <Route path="/accounting/fsli/other-current-assets" element={<FSLIDetail slug="other-current-assets" />} />
+          <Route path="/accounting/fsli/other-non-current-assets" element={<FSLIDetail slug="other-non-current-assets" />} />
           <Route path="/accounting/fsli/restricted-cash-non-current" element={<FSLIDetail slug="restricted_cash_non_current" />} />
           <Route path="/accounting/fsli/trade-receivables-net-non-current" element={<FSLIDetail slug="trade_receivables_net_non_current" />} />
           <Route path="/accounting/fsli/fixed-assets-net" element={<FSLIDetail slug="fixed_assets_net" />} />
