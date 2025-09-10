@@ -23,10 +23,12 @@ export default {
         'plus-jakarta': ['Plus Jakarta Sans', 'sans-serif'],
       },
 			fontSize: {
-				'h1': 'var(--font-h1)',
-				'h2': 'var(--font-h2)',
-				'h3': 'var(--font-h3)',
-				'h4': 'var(--font-h4)',
+				'h1': '2rem',      /* 32px */
+				'h2': '1.25rem',   /* 20px */ 
+				'h3': '1.125rem',  /* 18px */
+				'h4': '1rem',      /* 16px */
+				'small': '0.875rem',  /* 14px */
+				'micro': '0.75rem',   /* 12px */
 			},
 			maxWidth: {
 				'content': '1200px',
@@ -67,15 +69,14 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				
-				/* Corporate theme colors */
-				'corporate-blue': {
-					DEFAULT: 'hsl(var(--corporate-blue))',
-					light: 'hsl(var(--corporate-blue-light))',
-				},
-				'corporate-gray': {
-					DEFAULT: 'hsl(var(--corporate-gray))',
-					light: 'hsl(var(--corporate-gray-light))',
-				},
+				/* FSLI Essay specific colors */
+				'fsli-text': 'hsl(var(--fsli-text))',
+				'fsli-secondary': 'hsl(var(--fsli-secondary))',
+				'fsli-muted': 'hsl(var(--fsli-muted))',
+				'fsli-border': 'hsl(var(--fsli-border))',
+				'fsli-surface-1': 'hsl(var(--fsli-surface-1))',
+				'fsli-surface-2': 'hsl(var(--fsli-surface-2))',
+				'primary-light': 'hsl(var(--primary-light))',
 
 				/* Unified Card Theme */
 				'card-bg-light': 'hsl(var(--card-bg-light))',

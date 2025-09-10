@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import Breadcrumb from '@/components/Breadcrumb';
 import FSLISidebar from '@/components/FSLISidebar';
 import { InlineEditor } from '@/components/inline/InlineEditor';
+import { ExcelEmbedRenderer } from '@/components/ExcelEmbedRenderer';
 import { useInlineContent } from '@/hooks/useInlineContent';
 import { useRole } from '@/contexts/RoleContext';
 import { useToast } from '@/hooks/use-toast';
@@ -238,9 +239,6 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
         {section.blocks.map((block, index) => {
           const blockId = `${section.id}_block_${index}`;
           
-          // Debug logging to catch null/undefined issues
-          console.log('Rendering block:', { blockId, type: block.type, data: block.data });
-          
           switch (block.type) {
             case 'callout':
               return (
@@ -319,19 +317,27 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-fsli-surface-1 flex flex-col font-plus-jakarta">
       <Header />
       <ReadingProgressBar />
       
-      <main className="flex-1 flex relative">
-        {/* Left Sidebar */}
-        <div className="w-64 bg-muted/30 border-r border-border">
-          <FSLISidebar />
-        </div>
+      {/* FSLI Essay Layout - Exact specifications */}
+      <div className="mx-auto max-w-[1200px] px-6 lg:px-20 py-20 lg:py-[80px]">
+        <div className="grid grid-cols-12 gap-8">
+          
+          {/* Sidebar - Related line items */}
+          <aside className="col-span-12 lg:col-span-3 lg:sticky lg:top-24 lg:h-[calc(100vh-96px)] overflow-y-auto">
+            <h3 className="text-xs font-semibold tracking-wide text-fsli-secondary mb-3">
+              Related line items
+            </h3>
+            <FSLISidebar />
+          </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 flex justify-center relative">
-          <div className="w-full max-w-[700px] px-8 py-12">
+          {/* Main Content */}
+          <main className="col-span-12 lg:col-span-9 max-w-[860px]">
+            {/* Excel Embed Renderer */}
+            <ExcelEmbedRenderer />
+            
             {/* Breadcrumb */}
             <div className="mb-8">
               <Breadcrumb items={[
@@ -347,55 +353,79 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                 pageKey={pageKey}
                 sectionKey="title"
                 placeholder="Page Title"
-                className="text-4xl font-bold tracking-tight mb-4 leading-tight"
+                className="text-[32px] leading-tight font-bold text-fsli-text mb-4"
               />
               
               <InlineEditor
                 pageKey={pageKey}
                 sectionKey="subtitle"
                 placeholder="Page subtitle (optional)"
-                className="text-xl text-muted-foreground mb-6"
+                className="text-lg text-fsli-secondary mb-6"
               />
               
               {pageData?.notes_ref && (
-                <div className="text-sm italic text-muted-foreground border-l-4 border-primary/20 pl-4 mb-6">
+                <p className="mt-1 text-small italic text-fsli-muted">
                   Notes Reference: {pageData.notes_ref}
-                </div>
+                </p>
               )}
             </header>
 
-            {/* Key Points Section */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-semibold mb-6">Key Points</h2>
+            {/* Key Points Block */}
+            <section className="mb-8">
+              <h2 className="text-lg font-semibold text-fsli-text mb-3">Key Points</h2>
               
               {/* Display existing metrics */}
               {metrics?.length > 0 && (
-                <div className="space-y-4 mb-6 p-4 bg-accent/5 border border-accent/20 rounded-lg">
-                  {metrics.map(metric => (
-                    <div key={metric?.id} className="flex justify-between items-center py-2">
-                      <span className="font-medium">{metric?.label}</span>
-                      <span className="text-muted-foreground">
-                        {formatMetricValue(metric?.value, metric?.unit)}
-                      </span>
-                    </div>
-                  ))}
+                <div className="rounded-lg border border-fsli-border bg-fsli-surface-2 p-4 mb-6">
+                  <ul className="list-disc pl-6 space-y-2 text-fsli-text">
+                    {metrics.map(metric => (
+                      <li key={metric?.id} className="flex justify-between items-center">
+                        <span className="font-medium">{metric?.label}</span>
+                        <span className="text-fsli-secondary">
+                          {formatMetricValue(metric?.value, metric?.unit)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="key_points"
-                placeholder="Add key points and essential information here..."
-                className="prose max-w-none"
-              />
+              <div className="rounded-lg border border-fsli-border bg-fsli-surface-2 p-4">
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="key_points"
+                  placeholder="Add key points and essential information here..."
+                  className="prose max-w-none text-fsli-text"
+                />
+              </div>
             </section>
+
+            {/* Optional Quote Box */}
+            <figure className="mb-8">
+              <blockquote className="border-l-4 border-primary bg-primary-light p-4 rounded-r-md">
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="quote"
+                  placeholder="Add an optional quote or important note here..."
+                  className="text-fsli-text italic"
+                />
+              </blockquote>
+              <figcaption className="mt-2 text-xs text-fsli-muted">
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="quote_source"
+                  placeholder="Quote source (optional)"
+                  className="text-xs text-fsli-muted"
+                />
+              </figcaption>
+            </figure>
+
+            {/* Divider */}
+            <hr className="my-8 border-fsli-border" />
 
             {/* Dynamic Sections */}
             {sections?.map((section, index) => {
               if (!section?.id) return null;
-              
-              const prevSection = index > 0 ? sections[index - 1] : undefined;
-              const nextSection = index < sections.length - 1 ? sections[index + 1] : undefined;
               
               return (
                 <SectionH2
@@ -405,36 +435,39 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
                   title={section?.title || 'Untitled Section'}
                   collapsible={section?.collapsible}
                   defaultCollapsed={section?.defaultCollapsed}
-                  prevSection={prevSection ? { id: prevSection?.id, title: prevSection?.title } : undefined}
-                  nextSection={nextSection ? { id: nextSection?.id, title: nextSection?.title } : undefined}
                 >
                   {renderSectionBlocks(section)}
                 </SectionH2>
               );
             })}
-          </div>
 
-          {/* Right Sidebar - TOC */}
-          <div className="hidden lg:block w-80 p-8">
-            <TOCManager
-              sections={sections || []}
-              activeId={activeId}
-              onSectionClick={handleSectionClick}
-            />
-          </div>
+            {/* Divider */}
+            <hr className="my-8 border-fsli-border" />
+
+            {/* Single Prev/Next Navigation */}
+            <nav className="flex items-center justify-between gap-4 mt-12">
+              <div className="flex-1">
+                {/* Previous page link would go here */}
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="prev_link"
+                  placeholder="← Previous: Link to previous page"
+                  className="text-primary font-semibold hover:underline"
+                />
+              </div>
+              <div className="flex-1 text-right">
+                {/* Next page link would go here */}
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="next_link"
+                  placeholder="Next: Link to next page →"
+                  className="text-primary font-semibold hover:underline"
+                />
+              </div>
+            </nav>
+          </main>
         </div>
-
-        {/* Mobile TOC */}
-        <TOCManager
-          sections={sections || []}
-          activeId={activeId}
-          onSectionClick={handleSectionClick}
-          className="lg:hidden"
-        />
-
-        {/* Back to Top */}
-        <BackToTop />
-      </main>
+      </div>
 
       <Footer />
     </div>

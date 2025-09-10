@@ -1,168 +1,219 @@
-import React, { useState } from 'react';
-import * as XLSX from 'xlsx';
+import React, { useState, useEffect } from 'react';
+import { AlertTriangle, ExternalLink } from 'lucide-react';
 
 interface ExcelEmbedProps {
-  embedUrl?: string;
-  storagePath?: string;
-  rangeRef?: string;
+  url: string;
+  width?: string;
   height?: number;
+  fullscreen?: boolean;
   title?: string;
-  type: 'live' | 'static';
-}
-
-interface ExcelData {
-  headers: string[];
-  rows: (string | number)[][];
+  className?: string;
 }
 
 export const ExcelEmbed: React.FC<ExcelEmbedProps> = ({
-  embedUrl,
-  storagePath,
-  rangeRef = 'A1:Z100',
-  height = 400,
+  url,
+  width = "100%",
+  height = 600,
+  fullscreen = true,
   title,
-  type
+  className = ""
 }) => {
-  const [excelData, setExcelData] = useState<ExcelData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
-  // Load and parse Excel file for static mode
-  const loadExcelFile = async (filePath: string) => {
-    setLoading(true);
-    setError('');
-    
+  // Normalize OneDrive/SharePoint URLs to embed format
+  const normalizeUrl = (inputUrl: string): string => {
     try {
-      const response = await fetch(filePath);
-      if (!response.ok) throw new Error('Failed to load file');
+      const cleanUrl = inputUrl.trim();
       
-      const arrayBuffer = await response.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer);
-      const worksheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[worksheetName];
-      
-      // Parse range
-      const range = XLSX.utils.decode_range(rangeRef);
-      const data = XLSX.utils.sheet_to_json(worksheet, { 
-        range: range,
-        header: 1 
-      }) as (string | number)[][];
-      
-      if (data.length > 0) {
-        const headers = data[0] as string[];
-        const rows = data.slice(1);
-        setExcelData({ headers, rows });
+      // Already an embed URL
+      if (cleanUrl.includes('embed?') && cleanUrl.includes('wdAllowInteractivity=True')) {
+        return cleanUrl;
       }
+      
+      // OneDrive view URL -> embed URL
+      if (cleanUrl.includes('view.aspx?resid=')) {
+        const baseUrl = cleanUrl.split('view.aspx?')[0];
+        const params = new URL(cleanUrl).searchParams;
+        const resid = params.get('resid');
+        if (resid) {
+          return `${baseUrl}embed?resid=${resid}&authkey=${params.get('authkey') || ''}&wdAllowInteractivity=True`;
+        }
+      }
+      
+      // SharePoint Online URL -> add embed parameter
+      if (cleanUrl.includes('sharepoint.com') && cleanUrl.includes('.xlsx')) {
+        const separator = cleanUrl.includes('?') ? '&' : '?';
+        return `${cleanUrl}${separator}embed=1&wdAllowInteractivity=True`;
+      }
+      
+      // OneDrive short link (1drv.ms) - needs expansion (simplified approach)
+      if (cleanUrl.includes('1drv.ms')) {
+        throw new Error('Short links need to be expanded. Please use the full OneDrive share link.');
+      }
+      
+      // If URL contains embed parameters but missing wdAllowInteractivity
+      if (cleanUrl.includes('embed?') && !cleanUrl.includes('wdAllowInteractivity')) {
+        const separator = cleanUrl.includes('&') ? '&' : '&';
+        return `${cleanUrl}${separator}wdAllowInteractivity=True`;
+      }
+      
+      throw new Error('Unsupported URL format');
+      
     } catch (err) {
-      setError('Failed to load or parse Excel file');
-      console.error('Excel loading error:', err);
-    } finally {
-      setLoading(false);
+      throw new Error('Unable to create embed URL. Please use OneDrive Share > Embed option.');
     }
   };
 
-  React.useEffect(() => {
-    if (type === 'static' && storagePath) {
-      loadExcelFile(storagePath);
+  // Validate if URL is from supported hosts
+  const validateHost = (url: string): boolean => {
+    const supportedHosts = [
+      'onedrive.live.com',
+      'sharepoint.com',
+      '1drv.ms'
+    ];
+    
+    try {
+      const urlObj = new URL(url);
+      return supportedHosts.some(host => urlObj.hostname.includes(host));
+    } catch {
+      return false;
     }
-  }, [type, storagePath, rangeRef]);
+  };
 
-  if (type === 'live' && embedUrl) {
+  useEffect(() => {
+    const processUrl = async () => {
+      setLoading(true);
+      setError('');
+      
+      try {
+        if (!url) {
+          throw new Error('URL is required');
+        }
+        
+        if (!validateHost(url)) {
+          throw new Error('Only OneDrive and SharePoint URLs are supported');
+        }
+        
+        const normalized = normalizeUrl(url);
+        setEmbedUrl(normalized);
+        
+      } catch (err) {
+        console.error('Excel embed error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to process URL');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    processUrl();
+  }, [url]);
+
+  // Get responsive height based on screen size
+  const getResponsiveHeight = () => {
+    if (typeof window !== 'undefined') {
+      const width = window.innerWidth;
+      if (width < 768) return Math.max(420, height * 0.7); // Mobile min 420px
+      if (width < 1024) return Math.max(540, height * 0.9); // Tablet min 540px
+      return height; // Desktop
+    }
+    return height;
+  };
+
+  const responsiveHeight = getResponsiveHeight();
+
+  if (loading) {
     return (
-      <div className="my-6">
-        {title && <h4 className="text-lg font-semibold mb-3">{title}</h4>}
-        <div className="border border-border rounded-lg overflow-hidden shadow-sm">
-          <iframe
-            src={embedUrl}
-            width="100%"
-            height={height}
-            frameBorder="0"
-            className="w-full"
-            title={title || 'Excel Document'}
-          />
+      <div className={`my-6 ${className}`}>
+        {title && <h4 className="text-lg font-semibold mb-3 text-fsli-text">{title}</h4>}
+        <div 
+          className="border border-fsli-border rounded-lg flex items-center justify-center bg-fsli-surface-2"
+          style={{ height: `${responsiveHeight}px`, width }}
+        >
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="ml-3 text-fsli-secondary">Loading Excel document...</span>
         </div>
       </div>
     );
   }
 
-  if (type === 'static') {
-    if (loading) {
-      return (
-        <div className="my-6">
-          {title && <h4 className="text-lg font-semibold mb-3">{title}</h4>}
-          <div className="border border-border rounded-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground mt-2">Loading Excel data...</p>
-          </div>
-        </div>
-      );
-    }
-
-    if (error) {
-      return (
-        <div className="my-6">
-          {title && <h4 className="text-lg font-semibold mb-3">{title}</h4>}
-          <div className="border border-destructive rounded-lg p-4 text-destructive">
-            <p>{error}</p>
-          </div>
-        </div>
-      );
-    }
-
-    if (excelData) {
-      return (
-        <div className="my-6">
-          {title && <h4 className="text-lg font-semibold mb-3">{title}</h4>}
-          <div className="border border-border rounded-lg overflow-hidden">
-            <div className="overflow-x-auto" style={{ maxHeight: `${height}px` }}>
-              <table className="w-full text-sm">
-                <thead className="bg-muted sticky top-0 z-10">
-                  <tr>
-                    {excelData.headers.map((header, index) => (
-                      <th
-                        key={index}
-                        className="px-3 py-2 text-left font-medium border-r border-border last:border-r-0"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {excelData.rows.map((row, rowIndex) => (
-                    <tr
-                      key={rowIndex}
-                      className="border-b border-border hover:bg-muted/50"
-                    >
-                      {row.map((cell, cellIndex) => (
-                        <td
-                          key={cellIndex}
-                          className="px-3 py-2 border-r border-border last:border-r-0"
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          {storagePath && (
-            <div className="mt-2">
-              <a
-                href={storagePath}
-                download
-                className="text-sm text-primary hover:underline"
+  if (error) {
+    return (
+      <div className={`my-6 ${className}`}>
+        {title && <h4 className="text-lg font-semibold mb-3 text-fsli-text">{title}</h4>}
+        <div 
+          className="border border-destructive/50 rounded-lg p-6 bg-destructive/5"
+          style={{ width }}
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-destructive font-medium mb-2">Excel Embed Error</p>
+              <p className="text-fsli-secondary text-small mb-4">{error}</p>
+              <div className="space-y-2 text-fsli-secondary text-small">
+                <p><strong>To fix this:</strong></p>
+                <ol className="list-decimal list-inside space-y-1 ml-4">
+                  <li>Open your Excel file in OneDrive</li>
+                  <li>Click "Share" → "Embed"</li>
+                  <li>Copy the embed code URL</li>
+                  <li>Paste that URL here</li>
+                </ol>
+              </div>
+              <a 
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-4 text-primary hover:underline font-medium"
               >
-                Download original file
+                <ExternalLink className="h-4 w-4" />
+                Open in OneDrive
               </a>
             </div>
-          )}
+          </div>
         </div>
-      );
-    }
+      </div>
+    );
   }
 
-  return null;
+  if (!embedUrl) {
+    return null;
+  }
+
+  return (
+    <div className={`my-6 ${className}`}>
+      {title && <h4 className="text-lg font-semibold mb-3 text-fsli-text">{title}</h4>}
+      <div className="border border-fsli-border rounded-lg overflow-hidden shadow-sm">
+        <iframe
+          src={embedUrl}
+          width={width}
+          height={responsiveHeight}
+          frameBorder="0"
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin"
+          allowFullScreen={fullscreen}
+          title={title || 'Excel Document'}
+          className="w-full"
+          style={{ 
+            overflow: 'auto',
+            minHeight: `${responsiveHeight}px`
+          }}
+        />
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-small text-fsli-secondary hover:text-primary transition-colors"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Open in OneDrive
+        </a>
+        <p className="text-micro text-fsli-muted">
+          Use sheet tabs to navigate between worksheets
+        </p>
+      </div>
+    </div>
+  );
 };

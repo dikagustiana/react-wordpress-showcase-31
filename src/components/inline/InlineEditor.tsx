@@ -136,17 +136,15 @@ export const InlineEditor: React.FC<InlineEditorProps> = ({
   // Handle Excel insertion
   const handleExcelInsert = (type: 'live' | 'static', data: any) => {
     if (type === 'live' && data.embed_url) {
-      const iframe = `
-        <div style="margin: 1.5rem 0;">
-          <h4>${data.meta?.title || 'Excel Document'}</h4>
-          <iframe 
-            src="${data.embed_url}" 
-            style="width: 100%; height: 400px; border: 1px solid #e2e8f0; border-radius: 8px;"
-            frameborder="0">
-          </iframe>
+      const excelComponent = `
+        <div class="excel-embed-wrapper" data-excel-url="${data.embed_url}" data-excel-title="${data.meta?.title || 'Excel Document'}">
+          <div style="margin: 1.5rem 0; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; text-center;">
+            <p style="margin: 0; color: #6b7280;">📊 Excel Document: ${data.meta?.title || 'Untitled'}</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem; color: #9ca3af;">Click to view in interactive mode</p>
+          </div>
         </div>
       `;
-      handleFormat('insertHTML', iframe);
+      handleFormat('insertHTML', excelComponent);
     }
   };
 

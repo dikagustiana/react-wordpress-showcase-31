@@ -7,73 +7,46 @@ interface FSLISidebarProps {
 
 const FSLISidebar = ({ currentSlug }: FSLISidebarProps) => {
   const location = useLocation();
+  const currentPath = location.pathname;
   
   // Group FSLI items by taxonomy
   const currentAssets = fsliData.slice(0, 11); // First 11 items are current assets
   const nonCurrentAssets = fsliData.slice(11); // Rest are non-current assets
   
   const renderSidebarGroup = (title: string, items: FSLIItem[]) => (
-    <div className="mb-8">
-      <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4 px-4 font-plus-jakarta">
+    <div className="mb-6">
+      <h4 className="text-xs font-semibold text-fsli-muted uppercase tracking-wider mb-3">
         {title}
-      </h3>
-      <nav className="space-y-0.5">
+      </h4>
+      <div className="space-y-1">
         {items.map((item) => {
-          const isActive = currentSlug === item.slug;
-          const itemPath = `/accounting/fsli/${item.slug}`;
-          
-          if (isActive) {
-            // Show active item with special styling
-            return (
-              <div
-                key={item.slug}
-                className="block px-4 py-3 text-sm bg-navy-dark text-white rounded-lg mx-2 font-plus-jakarta"
-              >
-                <div className="font-medium">
-                  {item.english}
-                </div>
-                <div className="text-xs text-gray-200 mt-1">
-                  {item.indonesian}
-                </div>
-              </div>
-            );
-          }
+          const isActive = currentPath === `/accounting/fsli/${item.slug}` || 
+                          currentSlug === item.slug;
           
           return (
             <Link
               key={item.slug}
-              to={itemPath}
-              className="group block px-4 py-3 text-sm text-gray-700 hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-out rounded-lg mx-2 border-b border-gray-100 last:border-b-0"
+              to={`/accounting/fsli/${item.slug}`}
+              className={
+                isActive
+                  ? 'flex items-start gap-2 rounded-md border-l-4 border-primary bg-primary-light px-3 py-2 text-small font-medium text-fsli-text'
+                  : 'block rounded-md px-3 py-2 text-small text-fsli-secondary hover:bg-fsli-surface-2 transition-colors'
+              }
+              aria-current={isActive ? 'page' : undefined}
             >
-              <div className="font-medium group-hover:text-navy-dark transition-colors font-plus-jakarta">
-                {item.english}
-              </div>
-              <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-600 font-plus-jakarta">
-                {item.indonesian}
-              </div>
+              {item.english}
             </Link>
           );
         })}
-      </nav>
+      </div>
     </div>
   );
 
   return (
-    <aside 
-      className="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-beige-light border-r border-gray-200 overflow-y-auto z-30 shadow-sm"
-      style={{ width: '250px' }}
-    >
-      <div className="p-6">
-        <h2 className="text-lg font-bold text-navy-dark mb-8 font-plus-jakarta">
-          Related line items
-        </h2>
-        
-        <div className="space-y-2">
-          {renderSidebarGroup("Current Assets", currentAssets)}
-          {renderSidebarGroup("Non-Current Assets", nonCurrentAssets)}
-        </div>
-      </div>
-    </aside>
+    <div className="space-y-6">
+      {renderSidebarGroup("CURRENT ASSETS", currentAssets)}
+      {renderSidebarGroup("NON-CURRENT ASSETS", nonCurrentAssets)}
+    </div>
   );
 };
 
