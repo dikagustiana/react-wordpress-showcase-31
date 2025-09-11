@@ -317,159 +317,187 @@ export const DynamicFSLITemplate: React.FC<DynamicFSLITemplateProps> = ({ slug }
   }
 
   return (
-    <div className="min-h-screen bg-fsli-surface-1 flex flex-col font-plus-jakarta">
+    <div className="min-h-screen bg-background font-plus-jakarta">
       <Header />
       <ReadingProgressBar />
       
-      {/* FSLI Essay Layout - Exact specifications */}
-      <div className="mx-auto max-w-[1200px] px-6 lg:px-20 py-20 lg:py-[80px]">
-        <div className="grid grid-cols-12 gap-8">
+      {/* Wikipedia-style responsive layout */}
+      <div className="mx-auto px-6 lg:px-8 xl:px-12 2xl:px-20 py-8">
+        <div className="grid grid-cols-12 gap-6 lg:gap-8 max-w-[1920px] mx-auto">
           
-          {/* Sidebar - Related line items */}
-          <aside className="col-span-12 lg:col-span-3 lg:sticky lg:top-24 lg:h-[calc(100vh-96px)] overflow-y-auto">
-            <h3 className="text-xs font-semibold tracking-wide text-fsli-secondary mb-3">
-              Related line items
-            </h3>
-            <FSLISidebar />
+          {/* Left Sidebar - Hidden on mobile, collapsible on tablet, fixed on desktop */}
+          <aside className="hidden lg:block lg:col-span-3 xl:col-span-3 2xl:col-span-2">
+            <div className="sticky top-24 h-[calc(100vh-96px)] overflow-y-auto pr-4">
+              <div className="bg-card border border-border rounded-lg p-6 shadow-sm">
+                {/* Breadcrumb */}
+                <div className="mb-6">
+                  <Breadcrumb items={[
+                    { label: 'Accounting', path: '/accounting' },
+                    { label: 'FSLI', path: '/accounting/fsli' },
+                    { label: pageData?.title || 'Loading...' }
+                  ]} />
+                </div>
+                
+                {/* Table of Contents */}
+                <TOCManager 
+                  sections={sections} 
+                  activeId={activeId} 
+                  onSectionClick={handleSectionClick} 
+                />
+              </div>
+            </div>
           </aside>
 
-          {/* Main Content */}
-          <main className="col-span-12 lg:col-span-9 max-w-[860px]">
-            {/* Excel Embed Renderer */}
-            <ExcelEmbedRenderer />
-            
-            {/* Breadcrumb */}
-            <div className="mb-8">
-              <Breadcrumb items={[
-                { label: 'Accounting', path: '/accounting' },
-                { label: 'FSLI', path: '/accounting/fsli' },
-                { label: pageData?.title || 'Loading...' }
-              ]} />
-            </div>
+          {/* Main Content - Responsive width */}
+          <main className="col-span-12 lg:col-span-6 xl:col-span-6 2xl:col-span-8">
+            <div className="max-w-wiki-main mx-auto">
+              
+              {/* Mobile breadcrumbs - only shown on mobile */}
+              <div className="lg:hidden mb-6">
+                <Breadcrumb items={[
+                  { label: 'Accounting', path: '/accounting' },
+                  { label: 'FSLI', path: '/accounting/fsli' },
+                  { label: pageData?.title || 'Loading...' }
+                ]} />
+              </div>
 
-            {/* Page Header */}
-            <header className="mb-12">
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="title"
-                placeholder="Page Title"
-                className="text-[32px] leading-tight font-bold text-fsli-text mb-4"
-              />
-              
-              <InlineEditor
-                pageKey={pageKey}
-                sectionKey="subtitle"
-                placeholder="Page subtitle (optional)"
-                className="text-lg text-fsli-secondary mb-6"
-              />
-              
-              {pageData?.notes_ref && (
-                <p className="mt-1 text-small italic text-fsli-muted">
-                  Notes Reference: {pageData.notes_ref}
-                </p>
-              )}
-            </header>
+              {/* Excel Embed Renderer */}
+              <ExcelEmbedRenderer />
 
-            {/* Key Points Block */}
-            <section className="mb-8">
-              <h2 className="text-lg font-semibold text-fsli-text mb-3">Key Points</h2>
-              
-              {/* Display existing metrics */}
-              {metrics?.length > 0 && (
-                <div className="rounded-lg border border-fsli-border bg-fsli-surface-2 p-4 mb-6">
-                  <ul className="list-disc pl-6 space-y-2 text-fsli-text">
-                    {metrics.map(metric => (
-                      <li key={metric?.id} className="flex justify-between items-center">
-                        <span className="font-medium">{metric?.label}</span>
-                        <span className="text-fsli-secondary">
-                          {formatMetricValue(metric?.value, metric?.unit)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Article Header */}
+              <header className="mb-8">
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="title"
+                  placeholder="Page Title"
+                  className="text-h1 font-bold text-foreground mb-4 leading-tight"
+                />
+                
+                <InlineEditor
+                  pageKey={pageKey}
+                  sectionKey="subtitle"
+                  placeholder="Indonesian: Page subtitle (optional)"
+                  className="text-lg text-muted-foreground mb-2"
+                />
+                
+                {pageData?.notes_ref && (
+                  <p className="text-small italic text-muted-foreground">
+                    Notes Reference: {pageData.notes_ref}
+                  </p>
+                )}
+              </header>
+
+              {/* Key Points Section */}
+              <section className="mb-8">
+                <h2 className="text-h2 font-semibold text-foreground mb-3 pb-1 border-b border-border">
+                  Key Points
+                </h2>
+                
+                {/* Display existing metrics */}
+                {metrics?.length > 0 && (
+                  <div className="rounded-lg border border-border bg-muted p-6 mb-6">
+                    <ul className="list-disc pl-6 space-y-2 text-foreground">
+                      {metrics.map(metric => (
+                        <li key={metric?.id} className="flex justify-between items-center">
+                          <span className="font-medium">{metric?.label}</span>
+                          <span className="text-muted-foreground">
+                            {formatMetricValue(metric?.value, metric?.unit)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="rounded-lg border border-border bg-muted p-6">
+                  <InlineEditor
+                    pageKey={pageKey}
+                    sectionKey="key_points"
+                    placeholder="Add key points and essential information here..."
+                    className="prose max-w-none text-foreground"
+                  />
                 </div>
-              )}
+              </section>
 
-              <div className="rounded-lg border border-fsli-border bg-fsli-surface-2 p-4">
-                <InlineEditor
-                  pageKey={pageKey}
-                  sectionKey="key_points"
-                  placeholder="Add key points and essential information here..."
-                  className="prose max-w-none text-fsli-text"
-                />
+              {/* Quote Box (if needed) */}
+              <figure className="mb-8">
+                <blockquote className="border-l-4 border-primary bg-muted p-4 rounded-r-md">
+                  <InlineEditor
+                    pageKey={pageKey}
+                    sectionKey="quote"
+                    placeholder="Add an optional quote or important note here..."
+                    className="text-foreground italic"
+                  />
+                </blockquote>
+                <figcaption className="mt-2 text-small text-muted-foreground">
+                  <InlineEditor
+                    pageKey={pageKey}
+                    sectionKey="quote_source"
+                    placeholder="Quote source (optional)"
+                    className="text-small text-muted-foreground"
+                  />
+                </figcaption>
+              </figure>
+
+              <hr className="my-8 border-border" />
+
+              {/* Dynamic content sections with Wikipedia-style formatting */}
+              <div className="space-y-8">
+                {sections?.map((section, index) => {
+                  if (!section?.id) return null;
+                  
+                  return (
+                    <SectionH2
+                      key={section.id}
+                      id={section.id}
+                      pageKey={pageKey}
+                      title={section?.title || 'Untitled Section'}
+                      collapsible={section?.collapsible}
+                      defaultCollapsed={section?.defaultCollapsed}
+                    >
+                      {renderSectionBlocks(section)}
+                    </SectionH2>
+                  );
+                })}
               </div>
-            </section>
 
-            {/* Optional Quote Box */}
-            <figure className="mb-8">
-              <blockquote className="border-l-4 border-primary bg-primary-light p-4 rounded-r-md">
-                <InlineEditor
-                  pageKey={pageKey}
-                  sectionKey="quote"
-                  placeholder="Add an optional quote or important note here..."
-                  className="text-fsli-text italic"
-                />
-              </blockquote>
-              <figcaption className="mt-2 text-xs text-fsli-muted">
-                <InlineEditor
-                  pageKey={pageKey}
-                  sectionKey="quote_source"
-                  placeholder="Quote source (optional)"
-                  className="text-xs text-fsli-muted"
-                />
-              </figcaption>
-            </figure>
+              <hr className="my-8 border-border" />
 
-            {/* Divider */}
-            <hr className="my-8 border-fsli-border" />
+              {/* Navigation - Single instance at bottom */}
+              <nav className="flex items-center justify-between gap-4 pt-8">
+                <div className="flex-1">
+                  <InlineEditor
+                    pageKey={pageKey}
+                    sectionKey="prev_link"
+                    placeholder="← Previous: Link to previous page"
+                    className="text-accent hover:underline font-semibold"
+                  />
+                </div>
+                <div className="flex-1 text-right">
+                  <InlineEditor
+                    pageKey={pageKey}
+                    sectionKey="next_link"
+                    placeholder="Next: Link to next page →"
+                    className="text-accent hover:underline font-semibold"
+                  />
+                </div>
+              </nav>
 
-            {/* Dynamic Sections */}
-            {sections?.map((section, index) => {
-              if (!section?.id) return null;
-              
-              return (
-                <SectionH2
-                  key={section.id}
-                  id={section.id}
-                  pageKey={pageKey}
-                  title={section?.title || 'Untitled Section'}
-                  collapsible={section?.collapsible}
-                  defaultCollapsed={section?.defaultCollapsed}
-                >
-                  {renderSectionBlocks(section)}
-                </SectionH2>
-              );
-            })}
-
-            {/* Divider */}
-            <hr className="my-8 border-fsli-border" />
-
-            {/* Single Prev/Next Navigation */}
-            <nav className="flex items-center justify-between gap-4 mt-12">
-              <div className="flex-1">
-                {/* Previous page link would go here */}
-                <InlineEditor
-                  pageKey={pageKey}
-                  sectionKey="prev_link"
-                  placeholder="← Previous: Link to previous page"
-                  className="text-primary font-semibold hover:underline"
-                />
-              </div>
-              <div className="flex-1 text-right">
-                {/* Next page link would go here */}
-                <InlineEditor
-                  pageKey={pageKey}
-                  sectionKey="next_link"
-                  placeholder="Next: Link to next page →"
-                  className="text-primary font-semibold hover:underline"
-                />
-              </div>
-            </nav>
+            </div>
           </main>
+
+          {/* Right Sidebar - Optional infobox space (empty for now but can be populated) */}
+          <aside className="hidden 2xl:block 2xl:col-span-2">
+            <div className="sticky top-24 h-[calc(100vh-96px)] overflow-y-auto pl-4">
+              {/* Optional infobox content can be added here */}
+            </div>
+          </aside>
+          
         </div>
       </div>
 
       <Footer />
+      <BackToTop />
     </div>
   );
 };

@@ -15,7 +15,7 @@ const FSLISidebar = ({ currentSlug }: FSLISidebarProps) => {
   
   const renderSidebarGroup = (title: string, items: FSLIItem[]) => (
     <div className="mb-6">
-      <h4 className="text-xs font-semibold text-fsli-muted uppercase tracking-wider mb-3">
+      <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-3">
         {title}
       </h4>
       <div className="space-y-1">
@@ -29,8 +29,8 @@ const FSLISidebar = ({ currentSlug }: FSLISidebarProps) => {
               to={`/accounting/fsli/${item.slug}`}
               className={
                 isActive
-                  ? 'flex items-start gap-2 rounded-md border-l-4 border-primary bg-primary-light px-3 py-2 text-small font-medium text-fsli-text'
-                  : 'block rounded-md px-3 py-2 text-small text-fsli-secondary hover:bg-fsli-surface-2 transition-colors'
+                  ? 'flex items-start gap-2 rounded-md border-l-4 border-primary bg-primary-light px-3 py-2 text-small font-medium text-foreground'
+                  : 'block rounded-md px-3 py-2 text-small text-muted-foreground hover:bg-muted transition-colors'
               }
               aria-current={isActive ? 'page' : undefined}
             >

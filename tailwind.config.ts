@@ -23,15 +23,16 @@ export default {
         'plus-jakarta': ['Plus Jakarta Sans', 'sans-serif'],
       },
 			fontSize: {
-				'h1': '2rem',      /* 32px */
-				'h2': '1.25rem',   /* 20px */ 
-				'h3': '1.125rem',  /* 18px */
-				'h4': '1rem',      /* 16px */
+				'h1': '1.75rem',      /* 28px - Wikipedia style H1 */
+				'h2': '1.375rem',     /* 22px - Wikipedia style H2 */ 
+				'h3': '1.125rem',     /* 18px - Wikipedia style H3 */
+				'h4': '1rem',         /* 16px */
 				'small': '0.875rem',  /* 14px */
 				'micro': '0.75rem',   /* 12px */
 			},
 			maxWidth: {
 				'content': '1200px',
+				'wiki-main': '1150px', /* Wikipedia-style main content max width */
 			},
 			colors: {
 				border: 'hsl(var(--border))',

@@ -122,7 +122,7 @@ const Header = () => {
   ];
 
   return <header className="sticky top-0 z-50 bg-primary shadow-lg">
-      <div className="max-w-[1240px] mx-auto px-6">
+      <div className="max-w-[1920px] mx-auto px-6">
         <nav className="flex items-center h-16">
           {/* Logo with Login dropdown */}
           <div 

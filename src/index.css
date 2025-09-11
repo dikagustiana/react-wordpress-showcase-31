@@ -8,40 +8,40 @@
 
 @layer base {
   :root {
-    /* FSLI Essay Design System - Exact specifications */
-    --background: 0 0% 100%; /* White (#FFFFFF) */
-    --foreground: 220 14% 11%; /* Text #111827 */
+    /* Wikipedia-inspired Navy & White Theme */
+    --background: 0 0% 100%; /* White #FFFFFF */
+    --foreground: 210 40% 8%; /* Navy dark #0D1B2A for body text */
 
     --card: 0 0% 100%; /* White */
-    --card-foreground: 220 14% 11%; /* Text #111827 */
+    --card-foreground: 210 40% 8%; /* Navy dark text */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 14% 11%;
+    --popover-foreground: 210 40% 8%;
 
-    /* Primary: #2563EB */
-    --primary: 217 91% 60%; /* #2563EB */
-    --primary-foreground: 0 0% 100%; /* White */
-    --primary-hover: 217 91% 55%;
-    --primary-light: 214 100% 97%; /* #EFF6FF */
+    /* Primary: Navy Dark #0D1B2A */
+    --primary: 210 40% 8%; /* Navy dark #0D1B2A */
+    --primary-foreground: 0 0% 100%; /* White text on navy */
+    --primary-hover: 210 32% 15%; /* Lighter navy #16324F for hover */
+    --primary-light: 214 100% 97%; /* Light blue #EFF6FF */
 
-    /* Secondary: #6B7280 */
-    --secondary: 214 13% 50%; /* #6B7280 */
-    --secondary-foreground: 220 14% 11%;
+    /* Secondary: Light Gray */
+    --secondary: 0 0% 88%; /* Light gray #E0E0E0 for inactive menu */
+    --secondary-foreground: 210 40% 8%; /* Navy dark text */
 
-    /* Muted: #9CA3AF */
-    --muted: 210 16% 82%; /* #F9FAFB Surface 2 */  
-    --muted-foreground: 217 11% 65%; /* #9CA3AF */
+    /* Muted colors */
+    --muted: 0 0% 96%; /* Very light gray #F5F7FA for quote backgrounds */
+    --muted-foreground: 0 0% 60%; /* Gray #999 for notes */
 
-    --accent: 210 16% 82%; /* #F9FAFB */
-    --accent-foreground: 220 14% 11%;
+    --accent: 207 44% 49%; /* Light blue #4DA6FF for links */
+    --accent-foreground: 210 40% 8%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Border: #E5E7EB */
-    --border: 220 13% 91%; /* #E5E7EB */
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%; /* Primary blue */
+    /* Border: Light Gray #E0E0E0 */
+    --border: 0 0% 88%; /* Light gray #E0E0E0 */
+    --input: 0 0% 88%;
+    --ring: 207 44% 49%; /* Light blue for focus rings */
 
     /* Border radius values */
     --radius-sm: 6px;
@@ -103,13 +103,13 @@
     --card-border: 210 40% 92%;
     --card-hover-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 
-    /* FSLI Typography scale - Exact specifications */
-    --font-h1: 2rem;      /* 32px H1 */
-    --font-h2: 1.25rem;   /* 20px H2 */
-    --font-h3: 1.125rem;  /* 18px H3 */
+    /* Wikipedia-style Typography scale */
+    --font-h1: 1.75rem;   /* 28px H1 bold */
+    --font-h2: 1.375rem;  /* 22px H2 semi-bold */
+    --font-h3: 1.125rem;  /* 18px H3 semi-bold */
     --font-h4: 1rem;      /* 16px H4 */
     --font-size-micro: 0.75rem;   /* 12px Micro */
-    --font-size-small: 0.875rem;  /* 14px Small */
+    --font-size-small: 0.875rem;  /* 14px Small - for notes */
     --font-size-base: 1rem;       /* 16px Body */
     --font-size-lg: 1.125rem;
     --font-size-xl: 1.25rem;
@@ -315,18 +315,17 @@
 
   .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
     color: hsl(var(--foreground));
-    font-weight: 600;
-    line-height: 1.25;
+    line-height: 1.2;
   }
 
-  .prose h1 { font-size: 2.25rem; margin-top: 0; margin-bottom: 0.8888889em; }
-  .prose h2 { font-size: 1.875rem; margin-top: 2em; margin-bottom: 1em; }
-  .prose h3 { font-size: 1.5rem; margin-top: 1.6em; margin-bottom: 0.6em; }
+  .prose h1 { font-size: 1.75rem; font-weight: 700; margin-top: 0; margin-bottom: 1rem; }
+  .prose h2 { font-size: 1.375rem; font-weight: 600; margin-top: 2em; margin-bottom: 1em; border-bottom: 1px solid hsl(var(--border)); padding-bottom: 0.25rem; }
+  .prose h3 { font-size: 1.125rem; font-weight: 600; margin-top: 1.6em; margin-bottom: 0.6em; }
 
   .prose p {
-    margin-top: 1.25em;
-    margin-bottom: 1.25em;
-    line-height: 1.75;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
   }
 
   .prose blockquote {
@@ -391,13 +390,14 @@
   }
 
   .prose a {
-    color: hsl(var(--primary));
-    text-decoration: underline;
+    color: hsl(var(--accent));
+    text-decoration: none;
     font-weight: 500;
   }
 
   .prose a:hover {
-    color: hsl(var(--primary));
+    color: hsl(var(--accent));
+    text-decoration: underline;
   }
 
   /* Medium-style editor specific styles */
