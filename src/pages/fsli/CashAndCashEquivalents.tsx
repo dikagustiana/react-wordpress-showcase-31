@@ -1,8 +1,7 @@
-import React from 'react';
-import { DynamicFSLITemplate } from '@/components/DynamicFSLITemplate';
+import { CashAndCashEquivalents as FSLICashAndCashEquivalents } from '../../components/FSLITemplate';
 
-const CashAndCashEquivalents: React.FC = () => {
-  return <DynamicFSLITemplate slug="cash-and-cash-equivalents" />;
+const CashAndCashEquivalents = () => {
+  return <FSLICashAndCashEquivalents />;
 };
 
 export default CashAndCashEquivalents;
