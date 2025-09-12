@@ -63,11 +63,14 @@ const FSLITemplate = ({ itemSlug }: { itemSlug: string }) => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
-      <FSLISidebar currentSlug={itemSlug} />
-      
-      <main className="flex-1" style={{ marginLeft: '250px' }}>
-        <div className="max-w-content mx-auto px-6 py-8" style={{ paddingRight: '3rem' }}>
-          <Breadcrumb items={breadcrumbItems} />
+      <div className="flex">
+        <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-card border-r p-6 overflow-y-auto">
+          <FSLISidebar currentSlug={itemSlug} />
+        </aside>
+        
+        <main className="flex-1 ml-64">
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <Breadcrumb items={breadcrumbItems} />
           
           <div className="bg-card rounded-lg p-8 shadow-sm border">
             {/* Header Section */}
@@ -115,9 +118,10 @@ const FSLITemplate = ({ itemSlug }: { itemSlug: string }) => {
                 </section>
               ))}
             </div>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <Footer />
     </div>
