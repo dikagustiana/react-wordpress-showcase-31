@@ -63,14 +63,24 @@ const FSLITemplate = ({ itemSlug }: { itemSlug: string }) => {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       
+      {/* Breadcrumbs at top */}
+      <div className="bg-muted/30 border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <Breadcrumb items={breadcrumbItems} />
+        </div>
+      </div>
+      
       <div className="flex">
-        <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-card border-r p-6 overflow-y-auto">
-          <FSLISidebar currentSlug={itemSlug} />
+        <aside className="fixed left-0 top-32 h-[calc(100vh-8rem)] w-64 bg-card border-r overflow-y-auto">
+          {/* Related Items */}
+          <div className="p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4">Related Items</h3>
+            <FSLISidebar currentSlug={itemSlug} />
+          </div>
         </aside>
         
         <main className="flex-1 ml-64">
           <div className="max-w-7xl mx-auto px-6 py-8">
-            <Breadcrumb items={breadcrumbItems} />
           
           <div className="bg-card rounded-lg p-8 shadow-sm border">
             {/* Header Section */}
