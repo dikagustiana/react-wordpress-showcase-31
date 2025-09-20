@@ -1,41 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, AlertCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, Heart, Sparkles } from 'lucide-react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Breadcrumb from '../../components/Breadcrumb';
-import BookCard from '../../components/books/BookCard';
-import BookListToolbar from '../../components/books/BookListToolbar';
-import BookPagination from '../../components/books/BookPagination';
-import CategoryHero from '../../components/books/CategoryHero';
-import { BookUploadButton } from '../../components/books/BookUploadButton';
-import { PdfCardGrid } from '../../components/books/PdfCardGrid';
-import { useBooks, useFilteredBooks } from '../../hooks/useBooks';
-import { useCategoryMetadata } from '../../hooks/useCategoryMetadata';
-import { useBookUploads } from '../../hooks/useBookUploads';
-import type { BookUploadExtended, BookFilters } from '../../types/books';
+import ReadingRecommendationCard from '../../components/books/ReadingRecommendationCard';
+import ReadingListFilters from '../../components/books/ReadingListFilters';
+import type { ReadingFilters } from '../../components/books/ReadingListFilters';
+import { useReadingList, useFilteredReadingList } from '../../hooks/useReadingList';
 import { CATEGORY_NAMES } from '../../config/books';
-
-const BOOKS_PER_PAGE = 24;
 
 const BookListPage = () => {
   const { category } = useParams<{ category: string }>();
-  const [filters, setFilters] = useState<BookFilters>({
+  const [filters, setFilters] = useState<ReadingFilters>({
     search: '',
+    difficulty: [],
+    type: [],
     tags: [],
     sortBy: 'title'
   });
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const { books, loading, error } = useBooks(category || '');
-  const filteredBooks = useFilteredBooks(books, filters);
-  const { metadata, stats } = useCategoryMetadata(category || '', books);
-  const bookUploads = useBookUploads(category || '');
+  const { readings, loading, error } = useReadingList(category || '');
+  const filteredReadings = useFilteredReadingList(readings, filters);
   
-  const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
-  const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
-  const paginatedBooks = filteredBooks.slice(startIndex, startIndex + BOOKS_PER_PAGE);
-
   const categoryName = CATEGORY_NAMES[category || ''] || category || 'Unknown Category';
 
   const breadcrumbItems = [
@@ -44,11 +31,6 @@ const BookListPage = () => {
     { label: 'Categories', path: '/books/categories' },
     { label: categoryName }
   ];
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters]);
 
   // Send height updates for WordPress iframe
   useEffect(() => {
@@ -65,7 +47,7 @@ const BookListPage = () => {
     // Update on window resize
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
-  }, [filteredBooks, currentPage, books]);
+  }, [filteredReadings]);
 
   if (loading) {
     return (
@@ -77,7 +59,7 @@ const BookListPage = () => {
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
-                <p className="text-lg text-muted-foreground">Loading books...</p>
+                <p className="text-lg text-muted-foreground">Loading reading recommendations...</p>
               </div>
             </div>
           </div>
@@ -86,9 +68,6 @@ const BookListPage = () => {
       </div>
     );
   }
-
-  // Don't show error screen if only the old JSON books fail to load
-  // We'll handle this gracefully in the main render
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -108,107 +87,84 @@ const BookListPage = () => {
               Back to Categories
             </Link>
           </div>
-        </div>
 
-        {/* Hero Section */}
-        <CategoryHero metadata={metadata} stats={stats} />
-
-        {/* Books Section */}
-        <div id="books-section" className="max-w-7xl mx-auto px-6 py-8">
-          
-          {/* PDF Upload Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold">PDF Resources</h2>
-              <BookUploadButton
-                onUpload={bookUploads.uploadFile}
-                uploading={bookUploads.uploading}
-              />
+          {/* Hero Section */}
+          <section className="text-center py-12 mb-8">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Sparkles className="w-8 h-8 text-primary" />
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+                {categoryName}
+              </h1>
+              <Heart className="w-8 h-8 text-red-500" />
             </div>
-            
-            {/* PDF Files Grid */}
-            <PdfCardGrid
-              uploads={bookUploads.uploads as BookUploadExtended[]}
-              loading={bookUploads.loading}
-              searchTerm={bookUploads.searchTerm}
-              onSearchChange={bookUploads.setSearchTerm}
-              showDeleted={bookUploads.showDeleted}
-              onShowDeletedChange={bookUploads.setShowDeleted}
-              onDownload={bookUploads.downloadFile}
-              onDelete={bookUploads.deleteFile}
-              onReplaceCover={async (upload) => {
-                // Implement cover replacement logic
-                console.log('Replace cover for:', upload.id);
-              }}
-              currentPage={bookUploads.currentPage}
-              totalCount={bookUploads.totalCount}
-              itemsPerPage={bookUploads.itemsPerPage}
-              onPageChange={bookUploads.setCurrentPage}
-            />
-          </div>
+            <p className="text-lg text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              Hand-picked reading recommendations from your Learning Buddy. These aren't just any books – 
+              they're the ones that'll actually expand your mind and maybe even change how you see the world.
+            </p>
+            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-muted rounded-full text-sm text-muted-foreground">
+              <BookOpen className="w-4 h-4" />
+              {readings.length} curated recommendations
+            </div>
+          </section>
 
-          {books.length === 0 && !error ? (
-            /* Empty State - only show if no error */
+          {readings.length === 0 ? (
+            /* Empty State */
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-foreground mb-2">No Books Yet</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-2">Coming Soon</h2>
                 <p className="text-muted-foreground">
-                  No books yet for {categoryName}. Come back soon!
+                  We're curating an amazing collection of {categoryName.toLowerCase()} reading recommendations. 
+                  Check back soon!
                 </p>
               </div>
             </div>
-          ) : books.length > 0 ? (
+          ) : (
             <>
-              {/* Toolbar */}
-              <BookListToolbar
+              {/* Filters */}
+              <ReadingListFilters
                 filters={filters}
                 onFiltersChange={setFilters}
-                totalBooks={books.length}
-                filteredCount={filteredBooks.length}
+                totalItems={readings.length}
+                filteredCount={filteredReadings.length}
               />
 
-              {filteredBooks.length === 0 ? (
+              {filteredReadings.length === 0 ? (
                 /* No Results */
                 <div className="flex items-center justify-center py-20">
                   <div className="text-center">
                     <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-foreground mb-2">No Books Found</h2>
+                    <h2 className="text-xl font-semibold text-foreground mb-2">No Matches Found</h2>
                     <p className="text-muted-foreground">
-                      Try adjusting your search or filter criteria.
+                      Try adjusting your search or filter criteria to find what you're looking for.
                     </p>
                   </div>
                 </div>
               ) : (
                 <>
-                  {/* Books Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {paginatedBooks.map((book, index) => (
-                      <BookCard key={`${book.title}-${index}`} book={book} />
+                  {/* Reading Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    {filteredReadings.map((item) => (
+                      <ReadingRecommendationCard key={item.id} item={item} />
                     ))}
                   </div>
 
-                  {/* Pagination */}
-                  <BookPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
+                  {/* Footer Message */}
+                  <div className="text-center py-8 border-t border-border">
+                    <p className="text-muted-foreground">
+                      Found a great book that should be on this list? 
+                      <Link 
+                        to="/settings" 
+                        className="text-primary hover:underline ml-1"
+                      >
+                        Let us know!
+                      </Link>
+                    </p>
+                  </div>
                 </>
               )}
             </>
-          ) : error ? (
-            /* Error State - show this if JSON books failed but still allow PDF uploads */
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-foreground mb-2">Traditional Books Unavailable</h3>
-                <p className="text-muted-foreground">
-                  Book catalog is temporarily unavailable. You can still upload and access PDF resources above.
-                </p>
-              </div>
-            </div>
-          ) : null}
+          )}
         </div>
       </main>
 
