@@ -1,13 +1,14 @@
+import { ArrowLeft, Calendar, Clock, User } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
-import Header from './Header';
+import { getEssayById, getPhaseTitle, isCustomEssay } from '../lib/essayData';
 import Footer from './Footer';
-import { getEssayById, getPhaseTitle } from '../lib/essayData';
+import Header from './Header';
 
 const EssayDetailTemplate = () => {
   const { phase, essayId } = useParams<{ phase: string; essayId: string }>();
   const essay = getEssayById(essayId || '');
   const phaseTitle = getPhaseTitle(phase || '');
+  const isCustom = essay ? isCustomEssay(essay.id) : false;
 
   if (!essay || !phase) {
     return (
@@ -15,8 +16,10 @@ const EssayDetailTemplate = () => {
         <Header />
         <main className="max-w-4xl mx-auto px-6 py-8">
           <div className="text-center py-12">
-            <h1 className="text-2xl font-bold text-primary mb-4">Essay Not Found</h1>
-            <Link 
+            <h1 className="text-2xl font-bold text-primary mb-4">
+              Essay Not Found
+            </h1>
+            <Link
               to="/critical-thinking-research"
               className="text-card-cta hover:text-card-cta/80 font-medium"
             >
@@ -32,10 +35,10 @@ const EssayDetailTemplate = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-secondary/20">
       <Header />
-      
+
       <main className="max-w-4xl mx-auto px-6 py-8">
         {/* Back Button */}
-        <Link 
+        <Link
           to={`/critical-thinking-research/${phase}`}
           className="inline-flex items-center text-card-cta hover:text-card-cta/80 font-medium mb-8 transition-colors group"
         >
@@ -44,14 +47,27 @@ const EssayDetailTemplate = () => {
         </Link>
 
         {/* Article Header */}
-        <article className="bg-card-bg-light rounded-[var(--card-radius)] shadow-[var(--card-shadow)] p-8 font-plus-jakarta">
+        <article
+          className={`${
+            isCustom
+              ? 'bg-blue-50 border-2 border-blue-200'
+              : 'bg-card-bg-light'
+          } rounded-[var(--card-radius)] shadow-[var(--card-shadow)] p-8 font-plus-jakarta`}
+        >
           {/* Title */}
-          <h1 className="text-4xl font-bold text-primary mb-6 leading-tight">
-            {essay.title}
-          </h1>
+          <div className="flex items-start justify-between mb-6">
+            <h1 className="text-4xl font-bold text-primary leading-tight">
+              {essay.title}
+            </h1>
+            {isCustom && (
+              <span className="ml-4 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-semibold rounded-full">
+                Custom Essay
+              </span>
+            )}
+          </div>
 
           {/* Meta Information */}
-          <div className="flex items-center text-sm text-muted-foreground space-x-6 mb-8 pb-6 border-b border-gray-200">
+          <div className="flex items-center text-sm text-muted-foreground space-x-6 mb-6 pb-6 border-b border-gray-200">
             <div className="flex items-center">
               <User className="w-4 h-4 mr-2" />
               <span className="font-medium">{essay.author}</span>
@@ -69,8 +85,8 @@ const EssayDetailTemplate = () => {
           {/* Featured Image */}
           <div className="mb-8">
             <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
-              <img 
-                src={essay.thumbnail} 
+              <img
+                src={essay.thumbnail}
                 alt={essay.title}
                 className="w-full h-full object-cover"
               />
@@ -87,7 +103,9 @@ const EssayDetailTemplate = () => {
           {/* Tags */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-muted-foreground">Tags:</span>
+              <span className="text-sm font-medium text-muted-foreground">
+                Tags:
+              </span>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-card-icon-bg text-card-title">
                 {phaseTitle}
               </span>
@@ -100,7 +118,7 @@ const EssayDetailTemplate = () => {
 
         {/* Navigation to other essays */}
         <div className="mt-8 text-center">
-          <Link 
+          <Link
             to={`/critical-thinking-research/${phase}`}
             className="inline-flex items-center bg-card-cta hover:bg-card-cta/90 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           >
@@ -108,7 +126,7 @@ const EssayDetailTemplate = () => {
           </Link>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
