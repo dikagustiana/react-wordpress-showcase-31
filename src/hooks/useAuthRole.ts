@@ -2,7 +2,18 @@ import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
-type Role = 'admin' | 'viewer' | null;
+type Role = 'admin' | 'editor' | 'viewer' | null;
+
+const normalizeRole = (role: unknown): Role => {
+  if (!role || typeof role !== 'string') return null;
+
+  const normalized = role.toLowerCase();
+  if (normalized === 'admin' || normalized === 'editor' || normalized === 'viewer') {
+    return normalized;
+  }
+
+  return null;
+};
 
 export const useAuthRole = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -13,7 +24,7 @@ export const useAuthRole = () => {
   const readRoleFromUser = (u: User | null): Role => {
     try {
       const r = (u?.app_metadata as any)?.role;
-      return r === 'admin' || r === 'viewer' ? r : null;
+      return normalizeRole(r);
     } catch (error) {
       console.error('Error reading role from user:', error);
       return null;
@@ -32,7 +43,7 @@ export const useAuthRole = () => {
         try {
           const { data, error } = await supabase.rpc('get_user_role');
           if (error) throw error;
-          setRole((data as 'admin' | 'viewer') ?? 'viewer');
+          setRole(normalizeRole(data) ?? 'viewer');
         } catch {
           setRole('viewer');
         }
@@ -66,5 +77,5 @@ export const useAuthRole = () => {
     return () => sub.unsubscribe();
   }, []);
 
-  return { user, session, role, isAdmin: role === 'admin', loading };
+  return { user, session, role, isAdmin: role === 'admin' || role === 'editor', loading };
 };

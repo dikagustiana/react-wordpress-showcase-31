@@ -2,7 +2,7 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuthRole } from '@/hooks/useAuthRole';
 
 interface RoleContextType {
-  role: 'admin' | 'viewer' | null;
+  role: 'admin' | 'editor' | 'viewer' | null;
   isAdmin: boolean;
   loading: boolean;
 }

@@ -5,9 +5,9 @@ import { AlertTriangle } from 'lucide-react';
 export const WarningBanner: React.FC = () => {
   // Only show in development
   if (import.meta.env.PROD) return null;
-  
+
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const expectedProjectRef = 'jvetboekyihvcialyeai';
+  const expectedProjectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID || '';
   
   // Extract project ref from URL
   const urlMatch = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/);
