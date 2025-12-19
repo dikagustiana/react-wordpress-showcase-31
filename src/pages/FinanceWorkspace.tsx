@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
-import ExcelStatementViewer from '../components/ExcelStatementViewer';
+import { FinancialStatementRenderer } from '../components/financials';
 import { useState } from 'react';
 
 const FinanceWorkspace = () => {
@@ -276,33 +276,37 @@ const FinanceWorkspace = () => {
                 </div>
               </div>
               
-              <div className="rounded-lg overflow-hidden">
+              <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden max-h-[70vh] overflow-y-auto">
                 {activeTab === 'SOPL' && (
-                  <ExcelStatementViewer
+                  <FinancialStatementRenderer
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
-                    sheetName="Consol SoPL-OCI 24"
-                    heightClassName="h-[60vh]"
+                    sheetName="SOPL"
+                    title="Consolidated Statement of Profit or Loss and Other Comprehensive Income"
+                    subtitle="For the Year Ended 31 December 2024 (in thousands of IDR)"
                   />
                 )}
                 {activeTab === 'SOFP' && (
-                  <ExcelStatementViewer
+                  <FinancialStatementRenderer
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
-                    sheetName="Consol SoFP 24"
-                    heightClassName="h-[60vh]"
+                    sheetName="SOFP"
+                    title="Consolidated Statement of Financial Position"
+                    subtitle="As at 31 December 2024 (in thousands of IDR)"
                   />
                 )}
                 {activeTab === 'SOCF' && (
-                  <ExcelStatementViewer
+                  <FinancialStatementRenderer
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
-                    sheetName="CF 24"
-                    heightClassName="h-[60vh]"
+                    sheetName="SOCF"
+                    title="Consolidated Statement of Cash Flows"
+                    subtitle="For the Year Ended 31 December 2024 (in thousands of IDR)"
                   />
                 )}
                 {activeTab === 'SOCE' && (
-                  <ExcelStatementViewer
+                  <FinancialStatementRenderer
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
-                    sheetName="SoCE Consol"
-                    heightClassName="h-[60vh]"
+                    sheetName="SOCE"
+                    title="Consolidated Statement of Changes in Equity"
+                    subtitle="For the Year Ended 31 December 2024 (in thousands of IDR)"
                   />
                 )}
               </div>
