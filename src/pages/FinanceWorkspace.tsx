@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
-import { FinancialStatementRenderer } from '../components/financials';
+import { FinancialStatementView } from '../components/financials';
 import { useState } from 'react';
 
 const FinanceWorkspace = () => {
@@ -278,7 +278,7 @@ const FinanceWorkspace = () => {
               
               <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden max-h-[70vh] overflow-y-auto">
                 {activeTab === 'SOPL' && (
-                  <FinancialStatementRenderer
+                  <FinancialStatementView
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
                     sheetName="SOPL"
                     title="Consolidated Statement of Profit or Loss and Other Comprehensive Income"
@@ -286,7 +286,7 @@ const FinanceWorkspace = () => {
                   />
                 )}
                 {activeTab === 'SOFP' && (
-                  <FinancialStatementRenderer
+                  <FinancialStatementView
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
                     sheetName="SOFP"
                     title="Consolidated Statement of Financial Position"
@@ -294,7 +294,7 @@ const FinanceWorkspace = () => {
                   />
                 )}
                 {activeTab === 'SOCF' && (
-                  <FinancialStatementRenderer
+                  <FinancialStatementView
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
                     sheetName="SOCF"
                     title="Consolidated Statement of Cash Flows"
@@ -302,7 +302,7 @@ const FinanceWorkspace = () => {
                   />
                 )}
                 {activeTab === 'SOCE' && (
-                  <FinancialStatementRenderer
+                  <FinancialStatementView
                     fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
                     sheetName="SOCE"
                     title="Consolidated Statement of Changes in Equity"
