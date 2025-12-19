@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Breadcrumb from '../components/Breadcrumb';
+import ExcelStatementViewer from '../components/ExcelStatementViewer';
 import { useState } from 'react';
 
 const FinanceWorkspace = () => {
@@ -275,10 +276,35 @@ const FinanceWorkspace = () => {
                 </div>
               </div>
               
-              <div className="bg-gray-50 rounded-lg p-6">
-                <p className="text-center text-gray-600">
-                  {activeTab} - Consolidated Financial Statement would be embedded here
-                </p>
+              <div className="rounded-lg overflow-hidden">
+                {activeTab === 'SOPL' && (
+                  <ExcelStatementViewer
+                    fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
+                    sheetName="Consol SoPL-OCI 24"
+                    heightClassName="h-[60vh]"
+                  />
+                )}
+                {activeTab === 'SOFP' && (
+                  <ExcelStatementViewer
+                    fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
+                    sheetName="Consol SoFP 24"
+                    heightClassName="h-[60vh]"
+                  />
+                )}
+                {activeTab === 'SOCF' && (
+                  <ExcelStatementViewer
+                    fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
+                    sheetName="CF 24"
+                    heightClassName="h-[60vh]"
+                  />
+                )}
+                {activeTab === 'SOCE' && (
+                  <ExcelStatementViewer
+                    fileUrl="/assets/financials/consolidated_financials_psak338.xlsx"
+                    sheetName="SoCE Consol"
+                    heightClassName="h-[60vh]"
+                  />
+                )}
               </div>
             </div>
           </section>
